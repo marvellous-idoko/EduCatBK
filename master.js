@@ -216,10 +216,9 @@ async function  vft(result) {
 })
 // result section
 .post(rslt+'submitResult',async(req,res)=>{
-    
-    if ( result.submitResult(req.body) == true){
+    console.log(await result.submitResult(req.body) )
+    if (await result.submitResult(req.body) == true){
         res.json({code:1,msg:'successfully saved result'})
-
     }
     else{
         res.json({code:0})
