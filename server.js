@@ -9,7 +9,8 @@ const master = require('./master')
 const school = require('./school')
 
 
-app.use(cors({origin: 'https://educat-ng.netlify.app/'}));
+app.use(cors({origin: 'https://educat-ng.netlify.app'}));
+app.use(cors({origin: 'https://marvellous-idoko.github.io/EduRepo'}));
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
