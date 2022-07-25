@@ -14,7 +14,8 @@ const result = mongoose.Schema({
     class:String,
     session:String,
     subclass:String,
-    name:String
+    name:String,
+    avg:Number
 })
 module.exports = mongoose.model('result', result);
 

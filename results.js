@@ -6,12 +6,37 @@ const result = require('./schema/result')
 
 
 function m(e, r) {
-    console.log(r)
     if (e) {
         console.log(e + 'mlllml')
         throw new Error('database error . .  ' + e)
+    }else{
+    console.log(r)
     }
-    else return true
+    // else return true
+}
+async function calculateAvg(params) {
+    let totSc = 0
+    try{
+        let gy = await result.find({session:params.session,term:params.term,stId:params.stId})
+        for (let index = 0; index < gy.length; index++) {
+            const element = gy[index];
+            totSc = parseInt(element.total) + totSc
+        }
+        let oi = await student.findOne({id:params.stId}) 
+        oi.avg = totSc/gy.length
+        
+         oi.save((e, r) => {
+            if (e) throw new Error('database error . .  ' + e)
+            else {
+                console.log(r['avg'])
+                // res.json({ code: 1, msg: ''})
+            }
+        }
+        )
+    }catch(e){
+        console.log(e)
+    }
+    
 }
 module.exports = {
     submitResult: async function (rsltBody) {
@@ -37,15 +62,19 @@ module.exports = {
 
         try {
             var g = await rslt.save()
-            if(g['published'] == true)  return true
+            if(g['published'] == true) 
+            { 
+                calculateAvg(rsltBody)
+                return true
+            }
             else throw new Error('erro')
         } catch (e) {
             console.log(e)
             return { code: 0, msg: e }
         }
     },
-    getResult: async function (term, id) {
-        return await result.find({ term: term, stId: id })
+    getResult: async function (term, id,session) {
+        return await result.find({ term: term, stId: id,session:session })
     },
     getReslts: async function (session) {
         return await result.find({ term: '3rd', session: session })

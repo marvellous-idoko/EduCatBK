@@ -9,18 +9,19 @@ const master = require('./master')
 const school = require('./school')
 
 
-app.use(cors({origin: 'https://educat-ng.netlify.app'}));
-app.use(cors({origin: 'https://marvellous-idoko.github.io/EduRepo'}));
+app.use(cors());
+app.options('*', cors())
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 let URL = 'mongodb+srv://CaptJackSparrow:GcLNtd0BR6xiW11b@educatcluster0.xr1hmp5.mongodb.net/?retryWrites=true&w=majority'
-// mongoose.connect('mongodb://localhost:27017/',{useNewUrlParser: true, useUnifiedTopology: true })
-mongoose.connect(URL,{useNewUrlParser: true, useUnifiedTopology: true })
+
+mongoose.connect('mongodb://localhost:27017/',{useNewUrlParser: true, useUnifiedTopology: true })
+// mongoose.connect(URL,{useNewUrlParser: true, useUnifiedTopology: true })
 mongoose.connection.on('connected', ()=>{
     console.log("connected to DB");
 });
-
+// GcLNtd0BR6xiW11b
 mongoose.connection.on('error',(err)=>{
     if(err)console.log("error in DB connection"+err);
     console.log("connected")

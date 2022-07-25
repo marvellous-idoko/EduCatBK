@@ -23,6 +23,7 @@ mstr.get('/', (req, res) => {
     console.log('connec000ted')
 })
 // master
+
 mstr.post(pre + 'CreateSchool/', (req, res) => {
     var id = Math.floor(Math.random() * 1000000)
     console.info(id)
@@ -44,9 +45,18 @@ mstr.post(pre + 'CreateSchool/', (req, res) => {
     }
 })
 mstr.get(pre+'checkSchId/:id', async(req,res)=>{
+    // console.su('')
     let r = await school.findOne({schoolId:req.params.id})
     if(r == null ){
         res.json({code:0,msg:'school not found, check your ID and try again'})
+    }else{
+        res.json({code:1,msg:r})
+    }
+}).get(pre+'checkStdntId/:id', async(req,res)=>{
+    // console.su('')
+    let r = await Student.findOne({schoolId:req.params.id})
+    if(r == null ){
+        res.json({code:0,msg:'student record not found, check your ID and try again'})
     }else{
         res.json({code:1,msg:r})
     }
@@ -200,6 +210,13 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
    var ft = await result.getReslts(req.body.session)
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
 async function  vft(result) {
+    // get all results for one student by session, 3rd term, stdId
+    // sum the results.total
+    // avg: divide them by length of array
+    // if avg is > 39 promote else remain in same class
+    // repeat for all students
+
+    
     console.log(result)
     if(result.total > 39){
         var uio = await Student.findOne({id:result.stId} )
@@ -214,19 +231,33 @@ async function  vft(result) {
    ft.forEach(vft)
 
 })
+
+
 // result section
 .post(rslt+'submitResult',async(req,res)=>{
-    console.log(await result.submitResult(req.body) )
-    if (await result.submitResult(req.body) == true){
-        res.json({code:1,msg:'successfully saved result'})
-    }
-    else{
-        res.json({code:0})
+    let ty = await school.findOne({schId:req.body.schId})
+    console.log(ty['portal'])
+    if( ty['portal'] == true){
+        
+        if (await result.submitResult(req.body) == true){
+            res.json({code:1,msg:'successfully saved result'})
+        }
+        else{
+            res.json({code:0})
+        }
+    }else{
+        res.json({code:0,msg:'portal closed, contact admin'})
     }
 })
-mstr.get(rslt+'getRslt/:id/:term',async(req,res)=>{
-    console.log(req.params)
-   res.json(await result.getResult(req.params.term,req.params.id))
+mstr.get(rslt+'getRslt',async(req,res)=>{
+    
+    console.log(req.query)
+    if(await pin.checkPinUsage(req.query.pin)==true){
+        res.json({code:0,msg:'pin incorrect or already exceeded validity'})
+    }else{
+   res.json(await result.getResult(req.query.term,req.query.id,req.query.session))
+
+    }
 })
 
 // Update Student Info
