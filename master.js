@@ -237,7 +237,7 @@ async function  vft(result) {
 .post(rslt+'submitResult',async(req,res)=>{
     let ty = await school.findOne({schId:req.body.schId})
     console.log(ty['portal'])
-    if( ty['portal'] == false){
+    if( ty['portal'] == true){
         
         if (await result.submitResult(req.body) == true){
             res.json({code:1,msg:'successfully saved result'})
