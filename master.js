@@ -235,7 +235,7 @@ async function  vft(result) {
 
 // result section
 .post(rslt+'submitResult',async(req,res)=>{
-    let ty = await school.findOne({schId:req.body.schId})
+    let ty = await school.findOne({schoolId:req.body.schId})
     console.log(ty)
     if( ty['portal'] == true){
         
