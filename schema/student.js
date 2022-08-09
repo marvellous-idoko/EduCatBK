@@ -11,9 +11,11 @@ const Stdnt = mongoose.Schema({
     photo:String,
     schId:String,
     department:String,
+    sex:String,
     height:String,
     weight:String,
     DoB:Date,
-    bGrp:String
+    bGrp:String,
+    email:String
 })
 module.exports = mongoose.model('student', Stdnt);

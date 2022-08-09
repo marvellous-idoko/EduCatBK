@@ -8,9 +8,9 @@ var mongoose = require("mongoose");
 const master = require('./master')
 const school = require('./school')
 
-
 // app.use(cors());
 // app.options('*', cors())
+// app.use(cors({origin: 'http://localhost:4200'}));
 
 app.use(cors({origin: 'https://educat-ng.netlify.app'}));
 

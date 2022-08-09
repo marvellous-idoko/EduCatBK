@@ -40,8 +40,29 @@ async function calculateAvg(params) {
 }
 module.exports = {
     submitResult: async function (rsltBody) {
+        
+        
+        if(rsltBody.stId.length == 24){
+            let y = await result.findById( rsltBody.stId )
+            console.log(y) 
+            y.testScr = rsltBody.tscr
+            y.ExamScr = rsltBody.escr
+            y.total = rsltBody.tot
+            y.Grade = rsltBody.grd
+            y.lastUpdated = new Date()
+            y.lastUpdatedBy = rsltBody.updateBy
+            try {
+                var g = await y.save()
+                await calculateAvg(rsltBody)
+                return true
+            } catch (e) {
+                console.log(e)
+                return { code: 0, msg: e }
+            }            
+        }
+        else{
         let y = await student.findOne({ id: rsltBody.stId })
-        // console.log(rsltBody)      
+        console.log(rsltBody)      
         let rslt = new result()
         rslt.term = rsltBody.term
         rslt.subject = rsltBody.subject
@@ -58,13 +79,11 @@ module.exports = {
         rslt.class = rsltBody.class
         rslt.subclass = rsltBody.subclass
         rslt.name = y.name
-        
-
         try {
             var g = await rslt.save()
             if(g['published'] == true) 
             { 
-                calculateAvg(rsltBody)
+                await calculateAvg(rsltBody)
                 return true
             }
             else throw new Error('erro')
@@ -72,6 +91,7 @@ module.exports = {
             console.log(e)
             return { code: 0, msg: e }
         }
+    }
     },
     getResult: async function (term, id,session) {
         return await result.find({ term: term, stId: id,session:session })
