@@ -42,7 +42,22 @@ mstr.post(pre + 'CreateSchool/', async (req, res) => {
             sch.save((e, r) => {
                 if (e) throw new Error('unable to create user: ' + e)
                 else {
-                    res.json({ code: 1, msg: 'success' })
+                    msg = `
+                    <p>Confirm your Email by click the below button</p><br>
+                    <a href="${mainSite}School-Admin/actAcct/${acct['schoolId']}"> 
+                    <button style="    padding: 10px;
+                    background-color: #067606;
+                    color: white;
+                    border: 0;
+                    border-radius: 5px;"><h1>Reset Password</h1></button>`
+                   let emailWrap = {
+                        from: 'aptmachjo@outlook.com',
+                        to: r['email'],
+                        subject: 'Confirm Email <no reply>',
+                        html: msg
+                    };
+                    mailer.mailFree()
+                    res.json({ code: 1, msg: 'success, check your mail to confirm your email' })
                 }
             })
         } catch (e) {
