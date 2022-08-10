@@ -135,9 +135,9 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
     }
 
 }).post(schAdmin + 'actAcct', async (req, res) => {
-    // if( await pin.checkPinUsage(req.body.ActivationPin) == true){
-    //     res.json({code:0,msg:'Pin is incorrect or already used'})
-    // }else{
+    if( await pin.checkPinUsage(req.body.ActivationPin) == true){
+        res.json({code:0,msg:'Pin is incorrect or already used'})
+    }else{
     console.log(req.body)
     var acct = await school.findOne({ schoolId: req.body.id })
     acct.SchoolName = req.body.sName
@@ -154,7 +154,7 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
             res.json({ code: 1, msg: 'successfully activated account', info: r })
         }
     })
-    // }
+    }
 
 
 }).post(schAdmin + "addSubject", async (req, res) => {
