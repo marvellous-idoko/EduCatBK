@@ -145,9 +145,8 @@ module.exports = {
         console.log(error);
       }else{
         console.log('Message sent: ');
-        // console.log( info)
+        console.log( info)
       }
-      // return res.json({stat:'all good'});
     });
   }
 
