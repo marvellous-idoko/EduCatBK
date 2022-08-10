@@ -5,6 +5,7 @@ module.exports = {
    checkPinUsage: async (pinz) => {
       console.log(pinz)
       let pinn = await pin.findOne({ value: pinz })
+      console.log(pinn)
       if (pinn == null) {
          return true
       }
