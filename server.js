@@ -4,6 +4,8 @@ var express = require("express");
 var app = express();
 
 var cors = require("cors");
+app.use(cors({origin: 'https://educat-ng.netlify.app'}));
+
 var mongoose = require("mongoose");
 const master = require('./master')
 const school = require('./school')
@@ -12,7 +14,6 @@ const school = require('./school')
 // app.options('*', cors())
 // app.use(cors({origin: 'http://localhost:4200'}));
 
-app.use(cors({origin: 'https://educat-ng.netlify.app'}));
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
