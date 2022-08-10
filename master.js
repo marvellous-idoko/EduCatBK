@@ -17,7 +17,7 @@ const fileUpload = require("express-fileupload");
 const prodSrvr = 'https://voyage-chaise-91976.herokuapp.com/'
 const devSrvr = 'http://localhost:3000/'
 const devSrvrFrt = 'http://localhost:4200/'
-const mainSite = 'https://educat-ng.netlify.app'
+const mainSite = 'https://educat-ng.netlify.app/'
 const mailer = require('./mailer')
 mstr.use(fileUpload({ debug: false }))
 mstr.use(express.json());
