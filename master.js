@@ -42,7 +42,7 @@ mstr.post(pre + 'CreateSchool/', async (req, res) => {
             sch.save((e, r) => {
                 if (e) throw new Error('unable to create user: ' + e)
                 else {
-                    msg = `
+                   let msg = `
                     <p>Confirm your Email by click the below button</p><br>
                     <a href="${mainSite}School-Admin/actAcct/${r['schoolId']}"> 
                     <button style="    padding: 10px;
