@@ -44,7 +44,7 @@ mstr.post(pre + 'CreateSchool/', async (req, res) => {
                 else {
                     msg = `
                     <p>Confirm your Email by click the below button</p><br>
-                    <a href="${mainSite}School-Admin/actAcct/${acct['schoolId']}"> 
+                    <a href="${mainSite}School-Admin/actAcct/${r['schoolId']}"> 
                     <button style="    padding: 10px;
                     background-color: #067606;
                     color: white;
