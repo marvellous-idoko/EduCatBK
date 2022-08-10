@@ -50,14 +50,13 @@ mstr.post(pre + 'CreateSchool/', async (req, res) => {
                     color: white;
                     border: 0;
                     border-radius: 5px;"><h1>Reset Password</h1></button>`
-                    console.log(r['email'])
                     let emailWrap = {
                         from: 'aptmachjo@outlook.com',
                         to: r['email'],
                         subject: 'Confirm Email <no reply>',
                         html: msg
                     };
-                    mailer.mailFree()
+                    mailer.mailFree(emailWrap)
                     res.json({ code: 1, msg: 'success, check your mail to confirm your email' })
                 }
             })
