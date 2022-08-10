@@ -23,7 +23,7 @@ module.exports = {
       }
       } 
    },
-   createPin: async function (id, noOfT, res) {
+   createPin: async function (id, noOfT = 1, res) {
 
       let yu = new pin()
       yu.id = id
