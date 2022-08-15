@@ -11,13 +11,16 @@ const teacherApi = '/teacher/';
 const rslt = '/result/';
 const pin = require('./pin');
 const Auth = require('./auth');
+const promoter = require('./promote')
 const Student = require("./schema/student");
+const Result = require("./schema/result");
 const result = require('./results')
 const fileUpload = require("express-fileupload");
 const prodSrvr = 'https://voyage-chaise-91976.herokuapp.com/'
 const devSrvr = 'http://localhost:3000/'
 const devSrvrFrt = 'http://localhost:4200/'
 const mainSite = 'https://educat-ng.netlify.app/'
+const crypto = require('crypto')
 const mailer = require('./mailer')
 mstr.use(fileUpload({ debug: false }))
 mstr.use(express.json());
@@ -37,11 +40,21 @@ mstr.post(pre + 'CreateSchool/', async (req, res) => {
         sch.email = req.body.email
         sch.schoolId = id;
         sch.portal = false
+        sch.subjects = ['MATHEMATICS','FURTHER MATHEMATICS',
+                    'ENGLISH LANGUAGE','GEOGRAPHY',
+                      'BIOLOGY', 'BUSINESS STUDIES',
+                    'HOME ECONOMICS', 'RELIGOUS STUDIES',
+                    'SOCIAL STUDIES','CIVIC EDUCATION',
+                    'CHEMISTRY','PHYSICS','COMPUTER STUDIES',
+                    'FOOD AND NUTRITION','TECHNICAL DRAWING',
+                    'BASIC TECHNOLOGY','ECONOMICS','GOVERNMENT',
+                    'COMMERCE','ACCOUNTING','MARKETING',  ]
         sch.subClasses = ['JSS1A', 'JSS2A', 'JSS3A', 'SSS1A', 'SSS2A', 'SSS3A']
         try {
             sch.save((e, r) => {
                 if (e) throw new Error('unable to create user: ' + e)
                 else {
+                    console.log(r)
                    let msg = `
                     <h1> Here is your school ID: ${r['schoolId']}</h1>
                     <p>Confirm your Email by click the below button</p><br>
@@ -88,6 +101,7 @@ mstr.get(pre + 'checkSchId/:id', async (req, res) => {
 
 // School Admin section
 mstr.post(schAdmin + "addTeacher", (req, res) => {
+    let hash = pwdHasher('123456')
     var nTeacher = new teacher()
     nTeacher.teacherID = 'TCHR' + Math.floor(Math.random() * 1000000)
     nTeacher.subject = req.body.subjects
@@ -96,7 +110,9 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
     nTeacher.schId = req.body.schId
     nTeacher.name = req.body.personaleDet.name
     nTeacher.dateOfEnrolMent = new Date()
-    nTeacher.pwd = '123456'
+    nTeacher.pwd = hash['hash']
+    nTeacher.salt = hash['salt']
+   
     try {
         nTeacher.save((e, r) => {
             if (e) throw new Error('database error . .  ' + e)
@@ -139,10 +155,11 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
     if( await pin.checkPinUsage(req.body.ActivationPin) == true){
         res.json({code:0,msg:'Pin is incorrect or already used'})
     }else{
-    console.log(req.body)
-    var acct = await school.findOne({ schoolId: req.body.id })
+let hash = pwdHasher(req.body.pwd)
+    let acct = await school.findOne({ schoolId: req.body.id })
     acct.SchoolName = req.body.sName
-    acct.pwd = req.body.pwd
+    acct.pwd = hash['hash']
+    acct.salt = hash['salt']
     acct.schoolMotto = req.body.sMotto
     acct.address = req.body.address
     acct.activated = true
@@ -187,6 +204,7 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
 
             req.files.photo.mv(up, (err) => {
                 let newStdnt = new Student()
+                let hash  = pwdHasher('123456')
                 newStdnt.name = jui.name
                 newStdnt.id = sch.SchoolName.slice(0, sch.SchoolName.indexOf(" ")) + Math.floor(Math.random() * 100000)
                 newStdnt.class = jui.class
@@ -194,12 +212,13 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
                 newStdnt.contact = jui.pCont
                 newStdnt.dateREg = new Date()
                 newStdnt.schId = sch.schoolId
-                newStdnt.pwd = '123456'
                 newStdnt.height = jui.height
                 newStdnt.weight = jui.weight
                 newStdnt.DoB = jui.DoB
                 newStdnt.sex = jui.sex
                 newStdnt.bGrp = jui.bGrp
+                newStdnt.pwd = hash.hash
+                newStdnt.salt = hash.salt
                 // newStdnt.photo = devSrvr + up.slice(27)
                 newStdnt.photo = prodSrvr+up.slice(27)
                 console.log(newStdnt)
@@ -241,27 +260,47 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
     }
 }).post(schAdmin + "promoteStdnts", async (req, res) => {
     var ft = await result.getReslts(req.body.session)
+   let allStdnts = await Student.find({schId:req.body.id})
+   let notPromoted=[]
 
-    async function vft(result) {
-        // get all results for one student by session, 3rd term, stdId
-        // sum the results.total
-        // avg: divide them by length of array
-        // if avg is > 39 promote else remain in same class
-        // repeat for all students
+//    console.log(await Result.find({stId: 'YOUNG39537',session:'2020/2021',term:'1st'}))
+
+   for (let index = 0; index < allStdnts.length; index++) {
+   let scr = await promoter.calccForSingleStdnt(allStdnts[index]['id'],req.body.session)
+    // console.log('studtID: %s , scr:%s',allStdnts[index]['id'],scr)
+   if (scr > 39){
+//   console.log("former class: %s", (await Student.findOne({id:allStdnts[index]['id']}))['class'])
+//    console.log('new class %s',)
+   await promoter.promoteStdnt(allStdnts[index]['id'])  
+}
+else{
+notPromoted.push({stdntId:allStdnts[index]['id'],name:allStdnts[index]['name'],score:scr})
+}
+   } 
+   res.json(notPromoted)
+
+    // async function vft(result) {
+    //     // get all results for one student by session, 3rd term, stdId
+    //     // sum the results.total
+    //     // avg: divide them by length of array
+    //     // if avg is > 39 promote else remain in same class
+    //     // repeat for all students
+
+        
 
 
-        console.log(result)
-        if (result.total > 39) {
-            var uio = await Student.findOne({ id: result.stId })
+    //     console.log(result)
+    //     if (result.total > 39) {
+    //         var uio = await Student.findOne({ id: result.stId })
 
-            uio.class = (parseInt(uio.class) + 1).toString()
-            uio.save((e, r) => {
-                console.log(r)
-            })
-        }
+    //         uio.class = (parseInt(uio.class) + 1).toString()
+    //         uio.save((e, r) => {
+    //             console.log(r)
+    //         })
+    //     }
 
-    }
-    ft.forEach(vft)
+    // }
+    // ft.forEach(vft)
 
 }).post(schAdmin + 'updateTeacher', async (req, res) => {
     console.log(req.body)
@@ -326,8 +365,6 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
 
     }
 })
-
-
     // result section
     .post(rslt + 'submitResult', async (req, res) => {
         let ty = await school.findOne({ schoolId: req.body.schId })
@@ -343,6 +380,17 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
             res.json({ code: 0, msg: 'portal closed, contact admin' })
         }
     })
+
+
+
+
+    function pwdHasher(pwd){
+        let salt = crypto.randomBytes(16).toString('hex');
+        let hash = crypto.pbkdf2Sync(pwd, salt,
+            1000, 64, `sha512`).toString(`hex`);
+        return {hash:hash,salt:salt}
+    }
+
 mstr.get(rslt + 'getRslt', async (req, res) => {
 
     console.log(req.query)
@@ -352,6 +400,22 @@ mstr.get(rslt + 'getRslt', async (req, res) => {
         res.json(await result.getResult(req.query.term, req.query.id, req.query.session))
 
     }
+}).get(rslt + 'stdntAvg/:stId/:term/:session/:sen',async (req,res)=>{
+    res.json(await result.calcStdntAvg(req.params.stId,req.params.term,req.params.session+"/"+req.params.sen)   )
+}).get(rslt + 'stdntPosition/:stId/:schId/:term/:class/:subclass/:session/:sen',async (req,res)=>{
+    let llid = await Student.find({class:req.params.class,subclass:req.params.subclass})
+    let arr = []
+    for (let index = 0; index < llid.length; index++) {
+        arr.push(await promoter.calccForSingleStdnt(llid[index]['id'],req.params.session+"/"+req.params.sen,req.params.term) )
+
+    }
+    let ry = await promoter.calccForSingleStdnt(req.params.stId,req.params.session+"/"+req.params.sen,req.params.term) 
+    let arrSorted = arr.sort((function(a, b){return b - a}))
+    res.json( arrSorted.indexOf(ry) + 1)
+    // res.json(await result.calcStdntAvg(req.params.stId,req.params.term,req.params.session+"/"+req.params.sen)   )
+}).get(rslt + 'classAvg/:stId/:schId/:term/:class/:subClass/:session/:sen',async (req,res)=>{
+    res.json(await result.classAvg(req.params.class, req.params.subClass,req.params.schId,
+        req.params.term,req.params.session+"/"+req.params.sen)   )
 })
 
 // Update Student Info
@@ -496,7 +560,7 @@ mstr.get('/mstr/getRstDet/:id', async (req, res) => {
             msg = `<h1>Hey there</h1>
             <p>Graceful tutor, we received a request to change your password. \n 
             if this was you, click this button below to reset your password. 
-            <a href="${mainSite}resetPwd/${acct['schoolId']}"> 
+            <a href="${mainSite}resetPwd/${acct['teacherID']}"> 
             <button style="    padding: 10px;
             background-color: #067606;
             color: white;
@@ -517,7 +581,7 @@ mstr.get('/mstr/getRstDet/:id', async (req, res) => {
         msg = `<h1>Hey there</h1>
     <p>${acct['name']} we received a request to change your password. \n 
     if this was you, click this button below to reset your password.<br> 
-    <a href="${mainSite}resetPwd/${acct['schoolId']}"> 
+    <a href="${mainSite}resetPwd/${acct['id']}"> 
     <button style="    padding: 10px;
     background-color: #067606;
     color: white;
@@ -550,7 +614,9 @@ mstr.post('/mstr/createNewPwd', async (req, res) => {
                 res.json({ code: 0 })
 
             } else {
-                acct.pwd = req.body.pwd
+               let hashSch = pwdHasher(req.body.pwd)
+                acct.pwd = hashSch.hash
+                acct.salt = hashSch.salt
                 try {
                     await acct.save()
                     res.json({ code: 1, msg: 'successfully reset paasword, you can now sign in' })
@@ -561,8 +627,10 @@ mstr.post('/mstr/createNewPwd', async (req, res) => {
             }
         } else {
 
-            acct.pwd = req.body.pwd
-            try {
+            let hashTchr = pwdHasher(req.body.pwd)
+            acct.pwd = hashTchr.hash
+            acct.salt = hashTchr.salt     
+           try {
                 await acct.save()
                 res.json({ code: 1, msg: 'successfully reset paasword, you can now sign in' })
 
@@ -574,7 +642,9 @@ mstr.post('/mstr/createNewPwd', async (req, res) => {
         }
 
     } else {
-        acct.pwd = req.body.pwd
+        let hashStdnt = pwdHasher(req.body.pwd)
+        acct.pwd = hashStdnt.hash
+        acct.salt = hashStdnt.salt
         try {
             await acct.save()
             res.json({ code: 1, msg: 'successfully reset paasword, you can now sign in' })

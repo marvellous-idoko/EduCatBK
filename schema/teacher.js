@@ -9,6 +9,7 @@ const teacher = mongoose.Schema({
     dateOfEnrolMent:Date,
     subClass:Array,
     pwd:String,
-    schId:String
+    schId:String,
+    salt:String,
 })
 module.exports = mongoose.model('teacher', teacher);

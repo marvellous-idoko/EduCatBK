@@ -51,9 +51,10 @@ module.exports = {
             y.Grade = rsltBody.grd
             y.lastUpdated = new Date()
             y.lastUpdatedBy = rsltBody.updateBy
+            y.session = rsltBody.session
             try {
                 var g = await y.save()
-                await calculateAvg(rsltBody)
+                // await calculateAvg(rsltBody)
                 return true
             } catch (e) {
                 console.log(e)
@@ -101,5 +102,42 @@ module.exports = {
     },
     checkResultBeforeSubmit: async function (details) {
         return await result.find(details)
+    },
+    classAvg: async function(pClass,subclass,schId,term,session){
+        console.log(schId)
+        let rslt = await result.find({class:pClass,schId:schId,term:term,subclass:subclass,session:session})
+        let classTot = 0.00
+        for (let index = 0; index < rslt.length; index++) {
+            classTot = classTot + parseFloat( rslt[index]['total'] )            
+        } 
+        console.log(classTot)
+        return (classTot/(100*rslt.length))*100
+    },
+    // positionInClass: async function(A){
+    //         var len = array_length(A);
+    //         var i = 1;
+    //         while (i < len) {
+    //             var x = A[i];
+    //             var j = i - 1;
+    //             while (j >= 0 && A[j] > x) {
+    //                 A[j + 1] = A[j];
+    //                 j = j - 1;
+    //             }
+    //             A[j+1] = x;
+    //             i = i + 1;
+    //         }
+
+        
+    // },
+    calcStdntAvg: async function(stId,term,session){
+        // console.log(stId,term,session)
+        let rslt = await result.find({stId:stId,term:term,session:session})
+        let tot = 0.00
+        for (let index = 0; index < rslt.length; index++) {
+            tot = tot + parseFloat( rslt[index]['total'] )            
+        } 
+        console.log(tot)
+
+        return (tot/(100*rslt.length))*100
     }
 }

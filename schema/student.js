@@ -16,6 +16,7 @@ const Stdnt = mongoose.Schema({
     weight:String,
     DoB:Date,
     bGrp:String,
+    salt:String,
     email:String
 })
 module.exports = mongoose.model('student', Stdnt);

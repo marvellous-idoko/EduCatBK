@@ -18,6 +18,7 @@ const school = mongoose.Schema({
     schoolId:String,
     subClasses:Array,
     subjects:Array,
+    salt:String,
     pwd:String,
     address:String,
     schoolMotto:String,
