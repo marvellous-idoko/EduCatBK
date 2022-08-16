@@ -511,8 +511,58 @@ mstr.get(teacherApi + "getMoreStudents/:id", async (req, res) => {
     let lStudents = await Student.find({ subclass: lTeacher.subject })
 })
 mstr.post(teacherApi + "checkResults", async (req, res) => {
+    let array = await Student.find({class:req.body.class,subclass:req.body.subclass})
+    let arr = await result.checkResultBeforeSubmit(req.body)
+    if(arr.length == 0){
+        res.json(arr)
+    }
+    else if(array.length > arr.length){
 
-    res.json(await result.checkResultBeforeSubmit(req.body))
+        let yu = []
+        let yuu = []
+        let abs = []
+        // res.json(await result.checkResultBeforeSubmit(req.body))
+        for (let index = 0; index < array.length; index++) {
+            yu.push(array[index]['id'])
+        }
+        for (let index = 0; index < arr.length; index++) {
+            yuu.push(arr[index]['stId'])
+        }
+        for (let index = 0; index < yu.length; index++) {
+            if(!yuu.includes(yu[index])){
+                abs.push(yu[index])
+            }
+        }
+        for (let index = 0; index < abs.length; index++) {
+            let currStdnt = await Student.findOne({id:abs[index]})
+            let rslt = new Result()
+            rslt.term = req.body.term
+            rslt.subject = req.body.subject
+            rslt.stId = abs[index]
+            rslt.testScr = ''
+            rslt.ExamScr = ''
+            rslt.total = ''
+            rslt.Grade = ''
+            rslt.lastUpdated = ''
+            rslt.lastUpdatedBy = ''
+            rslt.schId = currStdnt['schId']
+            rslt.session = req.body.session
+            rslt.class = req.body.class
+            rslt.subclass = req.body.subclass
+            rslt.name = currStdnt['name']
+    
+            try {
+             arr.push(await rslt.save())
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        res.json(arr)
+        console.log("students: %s, reslts: %s, absent: %s",yu,yuu,abs)
+    }
+    else {
+        res.json(arr)
+    }
 })
 mstr.get('/images/**', (req, res) => {
     res.sendFile(__dirname + req.url)
