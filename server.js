@@ -4,8 +4,8 @@ var express = require("express");
 var app = express();
 
 var cors = require("cors");
-// app.use(cors({origin: 'https://educat-ng.netlify.app'}));
-app.use(cors({origin: 'http://localhost:4200'}));
+app.use(cors({origin: 'https://educat-ng.netlify.app'}));
+// app.use(cors({origin: 'http://localhost:4200'}));
 
 var mongoose = require("mongoose");
 const master = require('./master')
@@ -19,8 +19,8 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 let URL = 'mongodb+srv://CaptJackSparrow:GcLNtd0BR6xiW11b@educatcluster0.xr1hmp5.mongodb.net/?retryWrites=true&w=majority'
 
-mongoose.connect('mongodb://localhost:27017/',{useNewUrlParser: true, useUnifiedTopology: true })
-// mongoose.connect(URL,{useNewUrlParser: true, useUnifiedTopology: true })
+// mongoose.connect('mongodb://localhost:27017/',{useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(URL,{useNewUrlParser: true, useUnifiedTopology: true })
 mongoose.connection.on('connected', ()=>{
     console.log("connected to DB");
 });
