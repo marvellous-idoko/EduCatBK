@@ -2,26 +2,54 @@
 const pin = require('./schema/pin')
 
 module.exports = {
-   checkPinUsage: async (pinz) => {
-      console.log(pinz)
+   checkPinUsage: async (pinz, term = '', session = '', id = '') => {
       let pinn = await pin.findOne({ value: pinz })
-      console.log(pinn)
       if (pinn == null) {
          return true
       }
-      else{
-      if(pinn.noOfTimes == pinn.noOfTimesUsed){
-         pinn.used = false
-         pinn.save()
-         return true
+      else if (pinn.noOfTimesUsed == '1') {
 
+         if (pinn.term == term) {
+            console.log('bbjbj')
+
+            if (pinn.session == session) {
+               if (pinn.id == id) {
+                  if (pinn.noOfTimes == pinn.noOfTimesUsed) {
+                     pinn.used = false
+                     pinn.save()
+                     return true
+                  }
+                  else {
+                     pinn.noOfTimesUsed = (pinn.noOfTimesUsed + 1)
+                     pinn.save()
+                     return false
+                  }
+               } else {
+                  return true
+               }
+               // pinn.noOfTimesUsed = (pinn.noOfTimesUsed + 1)
+               // pinn.save()
+               // return false
+            }
+         } else {
+            return true
+         }
       }
-      else{
-         pinn.noOfTimesUsed = (pinn.noOfTimesUsed + 1)
-          pinn.save()
-         return false
+      else {
+
+         if (pinn.noOfTimes == pinn.noOfTimesUsed) {
+            pinn.used = false
+            pinn.save()
+            return true
+         }
+         else {
+            pinn.noOfTimesUsed = (pinn.noOfTimesUsed + 1)
+            pinn.term = term
+            pinn.session = session
+            pinn.save()
+            return false
+         }
       }
-      } 
    },
    createPin: async function (id, noOfT = 1, res) {
 
@@ -41,5 +69,7 @@ module.exports = {
       } catch (e) {
          res.json({ code: 0, msg: 'Err: ' + e })
       }
+   },myPins: async function(id){
+      return await pin.find({id:id})
    }
 }

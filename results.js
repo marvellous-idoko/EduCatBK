@@ -20,7 +20,12 @@ async function calculateAvg(params) {
         let gy = await result.find({session:params.session,term:params.term,stId:params.stId})
         for (let index = 0; index < gy.length; index++) {
             const element = gy[index];
-            totSc = parseInt(element.total) + totSc
+            if( parseInt(element.total) == null || undefined){
+                totSc =0 + totSc
+            }else{
+                totSc = parseInt(element.total) + totSc
+
+            }
         }
         let oi = await student.findOne({id:params.stId}) 
         oi.avg = totSc/gy.length
@@ -63,7 +68,6 @@ module.exports = {
         }
         else{
         let y = await student.findOne({ id: rsltBody.stId })
-        console.log(rsltBody)      
         let rslt = new result()
         rslt.term = rsltBody.term
         rslt.subject = rsltBody.subject
@@ -104,15 +108,20 @@ module.exports = {
         return await result.find(details)
     },
     classAvg: async function(pClass,subclass,schId,term,session){
-        console.log(schId)
         let rslt = await result.find({class:pClass,schId:schId,term:term,subclass:subclass,session:session})
         let classTot = 0.00
         for (let index = 0; index < rslt.length; index++) {
-            classTot = classTot + parseFloat( rslt[index]['total'] )            
+            if( rslt[index]['total'] == null || undefined){
+                rslt[index]['total'] = 0
+            }else{
+                classTot = classTot + parseFloat( rslt[index]['total'] )            
+
+            }
+
         } 
-        console.log(classTot)
         return (classTot/(100*rslt.length))*100
     },
+    
     // positionInClass: async function(A){
     //         var len = array_length(A);
     //         var i = 1;
@@ -129,15 +138,18 @@ module.exports = {
 
         
     // },
-    calcStdntAvg: async function(stId,term,session){
+    calcStdntAvg: async function(stId,schId,term,session){
         // console.log(stId,term,session)
-        let rslt = await result.find({stId:stId,term:term,session:session})
+        let rslt = await result.find({stId:stId,schId:schId,term:term,session:session})
         let tot = 0.00
         for (let index = 0; index < rslt.length; index++) {
-            tot = tot + parseFloat( rslt[index]['total'] )            
-        } 
-        console.log(tot)
+            if(rslt[index]['total'] == null || undefined){
+                rslt[index]['total'] == 0
+            }else{
+                tot = tot + parseFloat( rslt[index]['total'] )            
 
+            }
+        } 
         return (tot/(100*rslt.length))*100
     }
 }

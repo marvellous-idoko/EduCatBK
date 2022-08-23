@@ -22,7 +22,8 @@ const school = mongoose.Schema({
     pwd:String,
     address:String,
     schoolMotto:String,
-    portal:Boolean
+    portal:Boolean,
+    sessionPromoted:String
 
 })
 module.exports = mongoose.model('schoolw', school);
