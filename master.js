@@ -25,9 +25,25 @@ const mailer = require('./mailer')
 mstr.use(fileUpload({ debug: false }))
 mstr.use(express.json());
 mstr.use(express.urlencoded({ extended: true }));
-mstr.post('*', (req, res) => {
-   
+mstr.get('*', (req, res) => {
     console.log(req.url)
+   if(req.url.includes('.png')){
+    res.sendFile(__dirname + req.url)
+   
+}    
+   else if(req.url.includes('.jpg')){
+    res.sendFile(__dirname + req.url)
+
+   }
+    else if(req.url.includes('.jpeg')){
+        res.sendFile(__dirname + req.url)
+    
+    }
+   else if(req.url.includes('.jfif')){
+    res.sendFile(__dirname + req.url)
+   
+}
+
     res.redirect(req.url)
 })
 // master
