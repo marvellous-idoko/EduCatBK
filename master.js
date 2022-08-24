@@ -220,7 +220,7 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
                 newStdnt.pwd = hash.hash
                 newStdnt.salt = hash.salt
                 // newStdnt.photo = devSrvr + up.slice(27)
-                newStdnt.photo = prodSrvr + up.slice(27)
+                newStdnt.photo = prodSrvr + up
                 console.log(newStdnt)
                 try {
                     newStdnt.save((e, r) => {
