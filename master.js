@@ -25,8 +25,9 @@ const mailer = require('./mailer')
 mstr.use(fileUpload({ debug: false }))
 mstr.use(express.json());
 mstr.use(express.urlencoded({ extended: true }));
-mstr.get('/', (req, res) => {
-    console.log('connec000ted')
+mstr.get('*', (req, res) => {
+   
+    console.log(req.url)
 })
 // master
 
