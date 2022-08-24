@@ -19,7 +19,7 @@ const fileUpload = require("express-fileupload");
 const prodSrvr = 'https://voyage-chaise-91976.herokuapp.com/'
 const devSrvr = 'http://localhost:3000/'
 const devSrvrFrt = 'http://localhost:4200/'
-const mainSite = 'https://educat-ng.netlify.app/'
+const mainSite = 'https://reportkad.netlify.app/'
 const crypto = require('crypto')
 const mailer = require('./mailer')
 mstr.use(fileUpload({ debug: false }))
@@ -42,9 +42,11 @@ mstr.get('*', (req, res) => {
    else if(req.url.includes('.jfif')){
     res.sendFile(__dirname + req.url)
    
+}else{
+    res.redirect(req.url)
+
 }
 
-    res.redirect(req.url)
 })
 // master
 
