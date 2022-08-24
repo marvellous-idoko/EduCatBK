@@ -4,7 +4,7 @@ var express = require("express");
 var app = express();
 
 var cors = require("cors");
-app.use(cors({origin: 'https://educat-ng.netlify.app'}));
+app.use(cors({origin: 'https://reportkad.netlify.app'}));
 // app.use(cors({origin: 'http://localhost:4200'}));
 
 var mongoose = require("mongoose");
