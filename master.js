@@ -25,29 +25,29 @@ const mailer = require('./mailer')
 mstr.use(fileUpload({ debug: false }))
 mstr.use(express.json());
 mstr.use(express.urlencoded({ extended: true }));
-mstr.get('*', (req, res) => {
-    console.log(req.url)
-   if(req.url.includes('.png')){
-    res.sendFile(__dirname + req.url)
+// mstr.get('*', (req, res) => {
+//     console.log(req.url)
+//    if(req.url.includes('.png')){
+//     res.sendFile(__dirname + req.url)
    
-}    
-   else if(req.url.includes('.jpg')){
-    res.sendFile(__dirname + req.url)
+// }    
+//    else if(req.url.includes('.jpg')){
+//     res.sendFile(__dirname + req.url)
 
-   }
-    else if(req.url.includes('.jpeg')){
-        res.sendFile(__dirname + req.url)
+//    }
+//     else if(req.url.includes('.jpeg')){
+//         res.sendFile(__dirname + req.url)
     
-    }
-   else if(req.url.includes('.jfif')){
-    res.sendFile(__dirname + req.url)
+//     }
+//    else if(req.url.includes('.jfif')){
+//     res.sendFile(__dirname + req.url)
    
-}else{
-    res.redirect(req.url)
+// }else{
+//     res.redirect(req.url)
 
-}
+// }
 
-})
+// })
 // master
 
 mstr.post(pre + 'CreateSchool/', async (req, res) => {
