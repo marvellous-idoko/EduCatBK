@@ -28,6 +28,7 @@ mstr.use(express.urlencoded({ extended: true }));
 mstr.post('*', (req, res) => {
    
     console.log(req.url)
+    res.redirect(req.url)
 })
 // master
 
