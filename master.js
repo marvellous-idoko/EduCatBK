@@ -3,6 +3,7 @@
 var express = require("express");
 const mstr = express.Router();
 const school = require('./schema/school')
+const nataSch = require('./school')
 const teacher = require('./schema/teacher')
 const pre = '/mstr/';
 const schAdmin = '/schAdmin/';
@@ -29,7 +30,7 @@ mstr.use(express.urlencoded({ extended: true }));
 //     console.log(req.url)
 //    if(req.url.includes('.png')){
 //     res.sendFile(__dirname + req.url)
-   
+
 // }    
 //    else if(req.url.includes('.jpg')){
 //     res.sendFile(__dirname + req.url)
@@ -37,11 +38,11 @@ mstr.use(express.urlencoded({ extended: true }));
 //    }
 //     else if(req.url.includes('.jpeg')){
 //         res.sendFile(__dirname + req.url)
-    
+
 //     }
 //    else if(req.url.includes('.jfif')){
 //     res.sendFile(__dirname + req.url)
-   
+
 // }else{
 //     res.redirect(req.url)
 
@@ -279,50 +280,50 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
         }
     }
 }).post(schAdmin + "promoteStdnts", async (req, res) => {
-    if(parseInt( req.body.session.slice(5)) > new Date().getFullYear()){
-        res.json({code:0,msg:'The session has not started'})
+    if (parseInt(req.body.session.slice(5)) > new Date().getFullYear()) {
+        res.json({ code: 0, msg: 'The session has not started' })
     }
-    else{
-    let sch = await school.findOne({ schoolId: req.body.id })
-     let yuo = JSON.parse(sch.sessionPromoted)
-    let promtd = Object.keys(yuo)
-         if(promtd.includes(req.body.session)){
-            res.json({code:0,msg:'The students for this sessio are already promoted, you ca check ot pomoted list to promote a special student'})
-               }else{
-        var ft = await result.getReslts(req.body.session)
-        let allStdnts = await Student.find({ schId: req.body.id })
-        let notPromoted = []
-        let arrOfFailed = []
-       let yu = sch.sessionPromoted
-    
-       for (let index = 0; index < allStdnts.length; index++) {
-            let scr = await promoter.calccForSingleStdnt(allStdnts[index]['id'], req.body.session)
-            // console.log('studtID: %s , scr:%s',allStdnts[index]['id'],scr)
-            if (scr > 39) {
-                //   console.log("former class: %s", (await Student.findOne({id:allStdnts[index]['id']}))['class'])
-                //    console.log('new class %s',)
-                await promoter.promoteStdnt(allStdnts[index]['id'])
-    
+    else {
+        let sch = await school.findOne({ schoolId: req.body.id })
+        let yuo = JSON.parse(sch.sessionPromoted)
+        let promtd = Object.keys(yuo)
+        if (promtd.includes(req.body.session)) {
+            res.json({ code: 0, msg: 'The students for this sessio are already promoted, you ca check ot pomoted list to promote a special student' })
+        } else {
+            var ft = await result.getReslts(req.body.session)
+            let allStdnts = await Student.find({ schId: req.body.id })
+            let notPromoted = []
+            let arrOfFailed = []
+            let yu = sch.sessionPromoted
+
+            for (let index = 0; index < allStdnts.length; index++) {
+                let scr = await promoter.calccForSingleStdnt(allStdnts[index]['id'], req.body.session)
+                // console.log('studtID: %s , scr:%s',allStdnts[index]['id'],scr)
+                if (scr > 39) {
+                    //   console.log("former class: %s", (await Student.findOne({id:allStdnts[index]['id']}))['class'])
+                    //    console.log('new class %s',)
+                    await promoter.promoteStdnt(allStdnts[index]['id'])
+
+                }
+                else {
+                    arrOfFailed.push(allStdnts[index]['id'])
+                    notPromoted.push({ stdntId: allStdnts[index]['id'], name: allStdnts[index]['name'], score: scr })
+
+                }
             }
-            else {
-                arrOfFailed.push(allStdnts[index]['id'])
-                notPromoted.push({ stdntId: allStdnts[index]['id'], name: allStdnts[index]['name'], score: scr })
-    
+            yuo[req.body.session] = arrOfFailed
+            console.log(yuo)
+            sch.sessionPromoted = JSON.stringify(yuo)
+            try {
+                let y = await sch.save()
+                console.log(y)
+                res.json(notPromoted)
+            } catch (e) {
+                res.json({ code: 0, msg: e })
             }
         }
-        yuo[req.body.session] = arrOfFailed
-        console.log(yuo)
-        sch.sessionPromoted = JSON.stringify( yuo)
-        try{
-            let y = await sch.save()
-            console.log(y)
-            res.json(notPromoted)
-        }catch(e){
-            res.json({code:0,msg:e})
-        }
     }
-    }
- 
+
 
     // async function vft(result) {
     //     // get all results for one student by session, 3rd term, stdId
@@ -437,30 +438,30 @@ function pwdHasher(pwd) {
 }
 
 mstr.get(rslt + 'getRslt', async (req, res) => {
-    if (await pin.checkPinUsage(req.query.pin,req.query.term,req.query.session,req.query.id) == true) {
+    if (await pin.checkPinUsage(req.query.pin, req.query.term, req.query.session, req.query.id) == true) {
         res.json({ code: 0, msg: 'pin incorrect or already exceeded validity' })
     } else {
         res.json(await result.getResult(req.query.term, req.query.id, req.query.session))
 
     }
 }).get(rslt + 'stdntAvg/:stId/:schId/:term/:session/:sen', async (req, res) => {
-    res.json(await result.calcStdntAvg(req.params.stId,req.params.schId, req.params.term, req.params.session + "/" + req.params.sen))
+    res.json(await result.calcStdntAvg(req.params.stId, req.params.schId, req.params.term, req.params.session + "/" + req.params.sen))
 }).get(rslt + 'stdntPosition/:stId/:schId/:term/:class/:subclass/:session/:sen', async (req, res) => {
-    let llid = await 
-    Student.find({ class: req.params.class,schId:req.params.schId, subclass: req.params.subclass })
+    let llid = await
+        Student.find({ class: req.params.class, schId: req.params.schId, subclass: req.params.subclass })
     let arr = []
     for (let index = 0; index < llid.length; index++) {
         arr.push(await promoter.calccForSingleStdnt(llid[index]['id'], req.params.session + "/" + req.params.sen, req.params.term))
     }
     let ry = await promoter.calccForSingleStdnt(req.params.stId, req.params.session + "/" + req.params.sen, req.params.term)
     let arrSorted = arr.sort((function (a, b) { return b - a }))
-    res.json({code:1,position:arrSorted.indexOf(ry) + 1, noInClass:arrSorted.length})
+    res.json({ code: 1, position: arrSorted.indexOf(ry) + 1, noInClass: arrSorted.length })
     // res.json(await result.calcStdntAvg(req.params.stId,req.params.term,req.params.session+"/"+req.params.sen)   )
 }).get(rslt + 'classAvg/:stId/:schId/:term/:class/:subClass/:session/:sen', async (req, res) => {
     res.json(await result.classAvg(req.params.class, req.params.subClass, req.params.schId,
         req.params.term, req.params.session + "/" + req.params.sen))
-}).get(schAdmin+'stdntPins/:id',async(req,res)=>{
-   res.json(await pin.myPins(req.params.id))
+}).get(schAdmin + 'stdntPins/:id', async (req, res) => {
+    res.json(await pin.myPins(req.params.id))
 })
 
 // Update Student Info
@@ -540,7 +541,7 @@ mstr.post(teacherApi + 'enterResults/', async (req, res) => {
 })
 mstr.get(teacherApi + "getStudents/:id/:schId/:class", async (req, res) => {
     try {
-        let lStudents = await Student.find({ subclass: req.params.id, schId:req.params.schId,class: req.params.class })
+        let lStudents = await Student.find({ subclass: req.params.id, schId: req.params.schId, class: req.params.class })
         res.json({ code: 1, data: lStudents })
     } catch (e) {
         res.json({ code: 0, msg: e })
@@ -753,5 +754,27 @@ mstr.post('/mstr/createNewPwd', async (req, res) => {
 mstr.post('/pin/create', async (req, res) => {
 
     pin.createPin(req.body.id, req.body.noOfT, res)
+})
+
+mstr.post('/nataReg', async (req, res) => {
+    res.json(await nataSch.registerNata(req.body))
+}).post('/nataUploadFunds', async (req, res) => {
+    try{
+       res.json({code:1,msg:await nataSch.uploadFunds()})
+    } catch(e){
+        res.json({code:0,msg:e})
+    }
+})
+mstr.get('/nataNameQry', async (req, res) => {
+    console.log(req.query)
+    if (req.query.acctNo != '0037514056') {
+        res.json({ code: 0, msg: 'use the sandbox provided account number which is 0037514056' })
+    } else {
+        try {
+            res.json({code:1,msg: await nataSch.nameQry()})
+        } catch (e) {
+            res.json({ code: 0, msg: e })
+        }
+    }
 })
 module.exports = mstr;
