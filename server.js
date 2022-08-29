@@ -4,15 +4,15 @@ var express = require("express");
 var app = express();
 
 var cors = require("cors");
-app.use(cors({origin: 'https://reportkad.netlify.app'}));
+// app.use(cors({origin: 'https://reportkad.netlify.app'}));
 // app.use(cors({origin: 'http://localhost:4200'}));
 
 var mongoose = require("mongoose");
 const master = require('./master')
 const school = require('./school')
 
-// app.use(cors());
-// app.options('*', cors())
+app.use(cors());
+app.options('*', cors())
 
 
 app.use(express.json());
@@ -31,7 +31,7 @@ mongoose.connection.on('error',(err)=>{
 })
 
 
-app.use('/school', school)
+// app.use('/school', school)
 app.use('/master', master)
 app.use('/', master)
 // app.use('/', school)
