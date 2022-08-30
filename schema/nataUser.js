@@ -15,6 +15,7 @@ const Stdnt = mongoose.Schema({
     // height:String,
     // weight:String,
     income:Number,
+    bizMoney:Number,
     address:String,
     salt:String,
     email:String
