@@ -91,32 +91,32 @@ function upFundsProgress(token = 0) {
         'method': 'POST',
         'url': 'https://fsi.ng/api/v1/fcmb/payments/b2b/transfers',
         'headers': {
-          'x-ibm-client-id': 'f',
-          'Sandbox-Key': '4NN3rMeZHKPw8j4K32PxQ74nq0hCXIWZ1635258124',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+            'x-ibm-client-id': 'f',
+            'Sandbox-Key': '4NN3rMeZHKPw8j4K32PxQ74nq0hCXIWZ1635258124',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         },
         body: JSON.stringify({
-          "nameEnquiryRef": "999214190218121217000001177403",
-          "destinationInstitutionCode": "999063",
-          "channelCode": "2",
-          "beneficiaryAccountNumber": "0000000000",
-          "beneficiaryAccountName": "OBIOHA O. GODDY",
-          "beneficiaryBankVerificationNumber": "1",
-          "beneficiaryKYCLevel": "3",
-          "originatorAccountName": "OKUBOTE IDOWU OLUWAKEMI",
-          "originatorAccountNumber": "0000000002",
-          "transactionNarration": "Transfer ifo OKUBOTE",
-          "paymentReference": "12345",
-          "amount": "100.1",
-          "traceId": "12345",
-          "chargeAmount": "52.59",
-          "platformType": "ESB"
+            "nameEnquiryRef": "999214190218121217000001177403",
+            "destinationInstitutionCode": "999063",
+            "channelCode": "2",
+            "beneficiaryAccountNumber": "0000000000",
+            "beneficiaryAccountName": "OBIOHA O. GODDY",
+            "beneficiaryBankVerificationNumber": "1",
+            "beneficiaryKYCLevel": "3",
+            "originatorAccountName": "OKUBOTE IDOWU OLUWAKEMI",
+            "originatorAccountNumber": "0000000002",
+            "transactionNarration": "Transfer ifo OKUBOTE",
+            "paymentReference": "12345",
+            "amount": "100.1",
+            "traceId": "12345",
+            "chargeAmount": "52.59",
+            "platformType": "ESB"
         })
 
-      };
+    };
 
-      return request(options)
+    return request(options)
 
 }
 
@@ -131,17 +131,32 @@ module.exports = {
         user.income = body['pIncome']
         user.pwd = juk['hash']
         user.salt = juk['salt']
+        user.bizMoney = 0.00
+        console.log('po,,')
         try {
             return await user.save()
         } catch (e) {
+            console.log(e)
             return e
         }
     },
     login: async function () {
 
-    }, uploadFunds: async function () {
+    }, uploadFunds: async function (id,amt) {
         //    let sy =  await upFundsProgress(JSON.parse((await tokenizer()).body)['token'])
-        return JSON.parse(JSON.stringify(await upFundsProgress())).body
+        let nh = await upFundsProgress()
+        if (nh) {
+            let hyu = await userNata.findById(id)
+            hyu.bizMoney = hyu.bizMoney + parseFloat(amt)
+            try {
+                await hyu.save()
+                return JSON.parse(JSON.stringify(nh)).body
+            } catch (e) {
+                return e
+            }
+            // return JSON.parse(JSON.stringify()).body
+
+        }
     }, nameQry: async function () {
 
         var options = {
@@ -158,5 +173,7 @@ module.exports = {
             }
         };
         return request(options)
+    }, getBizMon: async function (id) {
+        return await userNata.findById(id)
     }
 };

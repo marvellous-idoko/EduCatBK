@@ -757,13 +757,20 @@ mstr.post('/pin/create', async (req, res) => {
 })
 
 mstr.post('/nataReg', async (req, res) => {
-    res.json(await nataSch.registerNata(req.body))
+   try{
+   let y =  await nataSch.registerNata(req.body)
+    res.json({code:1,msg:y})
+
+   }catch(e){
+    res.json({code:0,msg:e})
+
+   }
 }).post('/nataUploadFunds', async (req, res) => {
     try{
-       res.json({code:1,msg:await nataSch.uploadFunds()})
+       res.json({code:1,msg:await nataSch.uploadFunds(req.body.id,req.body.amt)})
     } catch(e){
         res.json({code:0,msg:e})
-    }
+    }   
 })
 mstr.get('/nataNameQry', async (req, res) => {
     console.log(req.query)
@@ -776,5 +783,7 @@ mstr.get('/nataNameQry', async (req, res) => {
             res.json({ code: 0, msg: e })
         }
     }
+}).get('/getBizMoney/:id',async(req,res)=>{
+    res.json(await nataSch.getBizMon(req.params.id))
 })
 module.exports = mstr;
