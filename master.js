@@ -285,43 +285,75 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
     }
     else {
         let sch = await school.findOne({ schoolId: req.body.id })
-        let yuo = JSON.parse(sch.sessionPromoted)
-        let promtd = Object.keys(yuo)
-        if (promtd.includes(req.body.session)) {
-            res.json({ code: 0, msg: 'The students for this sessio are already promoted, you ca check ot pomoted list to promote a special student' })
-        } else {
-            var ft = await result.getReslts(req.body.session)
-            let allStdnts = await Student.find({ schId: req.body.id })
-            let notPromoted = []
-            let arrOfFailed = []
-            let yu = sch.sessionPromoted
-
-            for (let index = 0; index < allStdnts.length; index++) {
-                let scr = await promoter.calccForSingleStdnt(allStdnts[index]['id'], req.body.session)
-                // console.log('studtID: %s , scr:%s',allStdnts[index]['id'],scr)
-                if (scr > 39) {
-                    //   console.log("former class: %s", (await Student.findOne({id:allStdnts[index]['id']}))['class'])
-                    //    console.log('new class %s',)
-                    await promoter.promoteStdnt(allStdnts[index]['id'])
-
+       console.log(typeof sch.sessionPromoted)
+        if(!sch.sessionPromoted){
+                var ft = await result.getReslts(req.body.session,req.body.id)
+                let allStdnts = await Student.find({ schId: req.body.id })
+                let notPromoted = []
+                let arrOfFailed = []
+                let yu = {}
+                for (let index = 0; index < allStdnts.length; index++) {
+                    let scr = await promoter.calccForSingleStdnt(allStdnts[index]['id'], req.body.session)
+                    // console.log('studtID: %s , scr:%s',allStdnts[index]['id'],scr)
+                    if (scr > 39) {
+                        //   console.log("former class: %s", (await Student.findOne({id:allStdnts[index]['id']}))['class'])
+                        //    console.log('new class %s',)
+                        await promoter.promoteStdnt(allStdnts[index]['id'])
+    
+                    }
+                    else {
+                        arrOfFailed.push(allStdnts[index]['id'])
+                        notPromoted.push({ stdntId: allStdnts[index]['id'], name: allStdnts[index]['name'], score: scr })
+    
+                    }
                 }
-                else {
-                    arrOfFailed.push(allStdnts[index]['id'])
-                    notPromoted.push({ stdntId: allStdnts[index]['id'], name: allStdnts[index]['name'], score: scr })
-
+                yu[req.body.session] = arrOfFailed
+                sch.sessionPromoted = JSON.stringify(yu)
+                try {
+                    let y = await sch.save()
+                    res.json(notPromoted)
+                } catch (e) {
+                    res.json({ code: 0, msg: e })
                 }
-            }
-            yuo[req.body.session] = arrOfFailed
-            console.log(yuo)
-            sch.sessionPromoted = JSON.stringify(yuo)
-            try {
-                let y = await sch.save()
-                console.log(y)
-                res.json(notPromoted)
-            } catch (e) {
-                res.json({ code: 0, msg: e })
+    
+        }else{
+            let yuo = JSON.parse(sch.sessionPromoted)
+            let promtd = Object.keys(yuo)
+            if (promtd.includes(req.body.session)) {
+                res.json({ code: 0, msg: 'The students for this session are already promoted, you ca check ot pomoted list to promote a special student' })
+            } else {
+                var ft = await result.getReslts(req.body.session,req.body.id)
+                let allStdnts = await Student.find({ schId: req.body.id })
+                let notPromoted = []
+                let arrOfFailed = []
+                let yu = sch.sessionPromoted
+    
+                for (let index = 0; index < allStdnts.length; index++) {
+                    let scr = await promoter.calccForSingleStdnt(allStdnts[index]['id'], req.body.session)
+                    // console.log('studtID: %s , scr:%s',allStdnts[index]['id'],scr)
+                    if (scr > 39) {
+                        //   console.log("former class: %s", (await Student.findOne({id:allStdnts[index]['id']}))['class'])
+                        //    console.log('new class %s',)
+                        await promoter.promoteStdnt(allStdnts[index]['id'])
+    
+                    }
+                    else {
+                        arrOfFailed.push(allStdnts[index]['id'])
+                        notPromoted.push({ stdntId: allStdnts[index]['id'], name: allStdnts[index]['name'], score: scr })
+    
+                    }
+                }
+                yu[req.body.session] = arrOfFailed
+                sch.sessionPromoted = JSON.stringify(yuo)
+                try {
+                    let y = await sch.save()
+                    res.json(notPromoted)
+                } catch (e) {
+                    res.json({ code: 0, msg: e })
+                }
             }
         }
+        
     }
 
 
@@ -349,12 +381,19 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
     // ft.forEach(vft)
 
 }).post(schAdmin + 'updateTeacher', async (req, res) => {
-    console.log(req.body)
     let tchr = await teacher.findOne({ teacherID: req.body.teacherId })
     tchr.name = req.body.personaleDet.name
     tchr.class = req.body.personaleDet.class
-    tchr.subject = req.body.subject
-    tchr.subClass = req.body.subClass
+    if(req.body.subjects != []){
+        tchr.subject = req.body.subjects
+    }else{
+        
+    }
+     if(req.body.subClass != []){
+        tchr.subClass = req.body.subClass
+    }else{
+
+    }    
     try {
         await tchr.save()
         res.json({ code: 1, msg: 'successfully updated teacher' })
@@ -410,6 +449,32 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
         }
 
     }
+}).post(schAdmin + 'promoteSingleStdnt' ,async(req,res)=>{
+    let sch = await school.findOne({schoolId:req.body.schId})
+    let sessionPromtd = JSON.parse(sch.sessionPromoted) 
+ 
+    let arr = sessionPromtd[req.body.session]
+if(!arr.includes(req.body.id)){
+    res.json({code:0,msg:'student already promoted'})
+
+} else{
+    let stdnt = await Student.findOne({id:req.body.id})
+   stdnt.class = parseInt(stdnt.class) + 1
+
+   // remove stdnt from array of not promoted for that session
+   var filteredArray = arr.filter(function(e) { return e !== req.body.id })
+    sessionPromtd[req.body.session] = filteredArray
+  sch.sessionPromoted = JSON.stringify(sessionPromtd)
+
+  try{
+    await   sch.save()  
+    await stdnt.save()
+    res.json({code:1,msg:'successfully promoted student'})
+  }catch(e){
+    res.json({code:0,msg:e})
+  }
+}
+
 })
     // result section
     .post(rslt + 'submitResult', async (req, res) => {
@@ -555,8 +620,9 @@ mstr.get(teacherApi + "getMoreStudents/:id", async (req, res) => {
     let lStudents = await Student.find({ subclass: lTeacher.subject })
 })
 mstr.post(teacherApi + "checkResults", async (req, res) => {
-    let array = await Student.find({ class: req.body.class, subclass: req.body.subclass })
+    let array = await Student.find({ class: req.body.class, subclass: req.body.subclass,schId:req.body.schId })
     let arr = await result.checkResultBeforeSubmit(req.body)
+    
     if (arr.length == 0) {
         res.json(arr)
     }

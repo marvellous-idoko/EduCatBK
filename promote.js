@@ -18,7 +18,6 @@ module.exports = {
 
     },
     promoteStdnt: async function (stId) {
-        console.log(stId)
         let stdnt = await Student.findOne({ id: stId })
         if (parseInt(stdnt.class) >= 6) {
             return;
