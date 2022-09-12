@@ -475,9 +475,16 @@ if(!arr.includes(req.body.id)){
   }
 }
 
+}).get(schAdmin + 'getList',async(req,res)=>{
+    if(req.query.type=="S"){
+        res.json(await Student.find({schId:req.query.schId}).limit(50))    
+    } else if(req.query.type=="T"){
+        res.json(await teacher.find({schId:req.query.schId}).limit(50))    
+        
+    }
 })
     // result section
-    .post(rslt + 'submitResult', async (req, res) => {
+.post(rslt + 'submitResult', async (req, res) => {
         let ty = await school.findOne({ schoolId: req.body.schId })
         // console.log(req.body)
         if (ty['portal'] == true) {
@@ -491,6 +498,12 @@ if(!arr.includes(req.body.id)){
             res.json({ code: 0, msg: 'portal closed, contact admin' })
         }
     })
+mstr.get(rslt + 'getBrdSht',async(req,res)=>{
+   try{ res.json(await Result.find(req.query))
+}catch(e){
+    res.json({code:0,msg:'error occured'})
+}
+} )
 
 
 
@@ -566,9 +579,28 @@ mstr.get(schAdmin + 'getSubClasses/:id', async (req, res) => {
 }).get(schAdmin + 'tchrDet/:id', async (req, res) => {
     res.json(await teacher.findOne({ teacherID: req.params.id }))
 }).get(schAdmin + 'stdntDet/:id', async (req, res) => {
-    console.log(req.params.id)
     res.json(await Student.findOne({ id: req.params.id }))
 })
+mstr.delete(schAdmin + 'deleteUser', async(req,res)=>{
+    let u = null
+    console.log(req.query)
+    if(req.query.userType == 'T'){
+       try{
+        await teacher.findByIdAndDelete(req.query.id)
+        res.json({code:1,msg:"successfully deleted"})
+       }catch(e){
+        res.json({code:0,msg:e})
+       }
+    }else if(req.query.userType == 'S'){
+        try{
+        await Student.findByIdAndDelete(req.query.id)
+        res.json({code:1,msg:"successfully deleted"})
+        }catch(e){
+        res.json({code:0,msg:e})
+       }
+    }    
+    })
+
 
 // Auth
 mstr.post(auth + 'login', async (req, res) => {
@@ -677,7 +709,6 @@ mstr.post(teacherApi + "checkResults", async (req, res) => {
 mstr.get('/images/**', (req, res) => {
     res.sendFile(__dirname + req.url)
 })
-
 mstr.get('/mstr/getRstDet/:id', async (req, res) => {
     //Student
     // for students and teachers implement such that they have to get written note from parent of guardian an
@@ -821,6 +852,8 @@ mstr.post('/pin/create', async (req, res) => {
 
     pin.createPin(req.body.id, req.body.noOfT, res)
 })
+
+
 
 mstr.post('/nataReg', async (req, res) => {
    try{
