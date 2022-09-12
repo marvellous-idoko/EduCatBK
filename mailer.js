@@ -27,13 +27,13 @@ const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
   service: "Hotmail",
   auth: {
-    user: "reportkad@outlook.com",
+    user: "Reportkad@outlook.com",
     pass: "Report2022"
-    // user: "aptmachjo@outlook.com",
-    // pass: "ALs)JDV$h/M2^WV"
-}
+  }
 });
 
+// user: "aptmachjo@outlook.com",
+// pass: "ALs)JDV$h/M2^WV"
 // const SibApiV3Sdk = require('sib-api-v3-sdk');
 // let defaultClient = SibApiV3Sdk.ApiClient.instance;
 
