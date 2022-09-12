@@ -86,7 +86,7 @@ mstr.post(pre + 'CreateSchool/', async (req, res) => {
                     border: 0;
                     border-radius: 5px;"><h1>Reset Password</h1></button>`
                     let emailWrap = {
-                        from: 'aptmachjo@outlook.com',
+                        from: 'reportkad@outlook.com',
                         to: r['email'],
                         subject: 'Confirm Email <no reply>',
                         html: msg

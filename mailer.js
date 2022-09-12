@@ -27,7 +27,7 @@ const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
   service: "Hotmail",
   auth: {
-    user: "Reportkad@outlook.com",
+    user: "reportkad@outlook.com",
     pass: "Report2022"
   }
 });
