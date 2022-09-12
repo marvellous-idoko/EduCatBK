@@ -4,7 +4,7 @@ var express = require("express");
 var app = express();
 
 var cors = require("cors");
-app.use(cors({origin: 'https://reportkad.netlify.app'}));
+app.use(cors({origin: ['https://reportkad.netlify.app','https://marvellous-idoko.github.io/EduRepo','http://localhost:4200']}));
 // app.use(cors({origin: 'http://localhost:4200'}));
 
 var mongoose = require("mongoose");
