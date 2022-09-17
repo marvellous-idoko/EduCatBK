@@ -49,7 +49,6 @@ module.exports = {
         
         if(rsltBody.stId.length == 24){
             let y = await result.findById( rsltBody.stId )
-            console.log(y) 
             y.testScr = rsltBody.tscr
             y.ExamScr = rsltBody.escr
             y.total = rsltBody.tot
@@ -101,8 +100,8 @@ module.exports = {
     getResult: async function (term, id,session) {
         return await result.find({ term: term, stId: id,session:session })
     },
-    getReslts: async function (session) {
-        return await result.find({ term: '3rd', session: session })
+    getReslts: async function (session,schId) {
+        return await result.find({ term: '3rd', session: session, schId:schId })
     },
     checkResultBeforeSubmit: async function (details) {
         return await result.find(details)

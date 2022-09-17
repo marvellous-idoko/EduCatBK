@@ -646,6 +646,9 @@ mstr.get(teacherApi + "getStudents/:id/:schId/:class", async (req, res) => {
 }).get(teacherApi + 'getTchrSubClasses/:id', async (req, res) => {
     let lTeacher = await teacher.findOne({ teacherID: req.params.id })
     res.json(lTeacher)
+}).get(teacherApi + 'getTchrSubject/:id/:schId',async (req,res)=>{
+    console.log(req.params)
+    let io = await teacher.findOne({ teacherID: req.params.id,schId:req.params.schId });res.json(io['subject'])
 })
 mstr.get(teacherApi + "getMoreStudents/:id", async (req, res) => {
     let lTeacher = await teacher.findOne({ teacherID: req.params.id })
