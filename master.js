@@ -218,12 +218,12 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
         let jui = JSON.parse(req.body.formInfo)
         var up = __dirname + '/images/' + 'educat_' + Math.floor(Math.random() * 10000000000) + '.png';
         // console.log(req.files +'  kol')
-        if (req.files == null) {
+        if (req.files != null) {
             res.json({ code: 0, msg: "no photo found, please include student photo" })
             return;
         } else {
 
-            req.files.photo.mv(up, (err) => {
+            // req.files.photo.mv(up, (err) => {
                 let newStdnt = new Student()
                 let hash = pwdHasher('123456')
                 newStdnt.name = jui.name
@@ -241,7 +241,8 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
                 newStdnt.pwd = hash.hash
                 newStdnt.salt = hash.salt
                 // newStdnt.photo = devSrvr + up.slice(27)
-                newStdnt.photo = prodSrvr + up
+                newStdnt.photo = jui.photo
+                // newStdnt.photo = prodSrvr + up
                 console.log(newStdnt)
                 try {
                     newStdnt.save((e, r) => {
@@ -257,7 +258,7 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
                     console.log(e)
                     res.json({ code: 0, msg: e })
                 }
-            })
+            // })
         }
 
     }
@@ -482,6 +483,9 @@ if(!arr.includes(req.body.id)){
         res.json(await teacher.find({schId:req.query.schId}).limit(50))    
         
     }
+}).get(schAdmin+'getSubclass/:id/:schId',async(req,res)=>{
+    let yu = await school.findOne({schoolId:req.params.schId})
+    res.json(yu['subClasses'])
 })
     // result section
 .post(rslt + 'submitResult', async (req, res) => {
