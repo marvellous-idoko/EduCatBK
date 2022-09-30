@@ -490,7 +490,7 @@ if(!arr.includes(req.body.id)){
     // result section
 .post(rslt + 'submitResult', async (req, res) => {
         let ty = await school.findOne({ schoolId: req.body.schId })
-        // console.log(req.body)
+        console.log(req.body)
         if (ty['portal'] == true) {
             if (await result.submitResult(req.body) == true) {
                 res.json({ code: 1, msg: 'successfully saved result' })
@@ -659,14 +659,13 @@ mstr.get(teacherApi + "getMoreStudents/:id", async (req, res) => {
     let lStudents = await Student.find({ subclass: lTeacher.subject })
 })
 mstr.post(teacherApi + "checkResults", async (req, res) => {
+    // console.log(req.body)
     let array = await Student.find({ class: req.body.class, subclass: req.body.subclass,schId:req.body.schId })
-    let arr = await result.checkResultBeforeSubmit(req.body)
-    
+    let arr = await result.checkResultBeforeSubmit({class:req.body.class,subclass:req.body.subclass,schId:req.body.schId,session:req.body.session,subject:req.body.subject,term:req.body.term})
     if (arr.length == 0) {
         res.json(arr)
     }
     else if (array.length > arr.length) {
-
         let yu = []
         let yuu = []
         let abs = []
@@ -688,12 +687,15 @@ mstr.post(teacherApi + "checkResults", async (req, res) => {
             rslt.term = req.body.term
             rslt.subject = req.body.subject
             rslt.stId = abs[index]
-            rslt.testScr = ''
+            rslt.testScr1 = ''
+            rslt.testScr2 = ''
+            rslt.testScr3 = ''
+            rslt.testScr4 = ''
             rslt.ExamScr = ''
             rslt.total = ''
             rslt.Grade = ''
             rslt.lastUpdated = ''
-            rslt.lastUpdatedBy = ''
+            // rslt.lastUpdatedBy = ''
             rslt.schId = currStdnt['schId']
             rslt.session = req.body.session
             rslt.class = req.body.class

@@ -49,7 +49,10 @@ module.exports = {
         
         if(rsltBody.stId.length == 24){
             let y = await result.findById( rsltBody.stId )
-            y.testScr = rsltBody.tscr
+            y.testScr1 = rsltBody.tscr1
+            y.testScr2 = rsltBody.tscr2
+            y.testScr3 = rsltBody.tscr3
+            y.testScr4 = rsltBody.tscr4
             y.ExamScr = rsltBody.escr
             y.total = rsltBody.tot
             y.Grade = rsltBody.grd
@@ -71,7 +74,10 @@ module.exports = {
         rslt.term = rsltBody.term
         rslt.subject = rsltBody.subject
         rslt.stId = rsltBody.stId
-        rslt.testScr = rsltBody.tscr
+        rslt.testScr1 = rsltBody.tscr1
+        rslt.testScr2 = rsltBody.tscr2
+        rslt.testScr3 = rsltBody.tscr3
+        rslt.testScr4 = rsltBody.tscr4
         rslt.ExamScr = rsltBody.escr
         rslt.total = rsltBody.tot
         rslt.Grade = rsltBody.grd
@@ -87,6 +93,7 @@ module.exports = {
             var g = await rslt.save()
             if(g['published'] == true) 
             { 
+                console.log(g)
                 await calculateAvg(rsltBody)
                 return true
             }
