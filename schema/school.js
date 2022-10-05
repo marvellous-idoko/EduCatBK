@@ -23,7 +23,12 @@ const school = mongoose.Schema({
     address:String,
     schoolMotto:String,
     portal:Boolean,
-    sessionPromoted:String
+    sessionPromoted:String,
+    infoBrd:String,
+    SchoolLogo:String,
+    SchoolBanner:String,
+    SchoolStamp:String,
+    principalSign:String,
 
 })
 module.exports = mongoose.model('schoolw', school);

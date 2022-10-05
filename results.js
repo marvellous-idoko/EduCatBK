@@ -125,7 +125,7 @@ module.exports = {
             }
 
         } 
-        return (classTot/(100*rslt.length))*100
+        return ((classTot/(100*rslt.length))*100).toFixed(2)
     },
     
     // positionInClass: async function(A){
@@ -156,6 +156,6 @@ module.exports = {
 
             }
         } 
-        return (tot/(100*rslt.length))*100
+        return ((tot/(100*rslt.length))*100).toFixed(2)
     }
 }

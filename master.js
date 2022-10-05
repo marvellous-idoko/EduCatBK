@@ -453,11 +453,13 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
 }).post(schAdmin + 'promoteSingleStdnt' ,async(req,res)=>{
     let sch = await school.findOne({schoolId:req.body.schId})
     let sessionPromtd = JSON.parse(sch.sessionPromoted) 
- 
+    if(!req.body.session){
+    req.body.session = (new Date().getFullYear() - 1).toString() + '/'+new Date().getFullYear().toString() 
+    }
     let arr = sessionPromtd[req.body.session]
+
 if(!arr.includes(req.body.id)){
     res.json({code:0,msg:'student already promoted'})
-
 } else{
     let stdnt = await Student.findOne({id:req.body.id})
    stdnt.class = parseInt(stdnt.class) + 1
@@ -476,7 +478,26 @@ if(!arr.includes(req.body.id)){
   }
 }
 
-}).get(schAdmin + 'getList',async(req,res)=>{
+}).post(schAdmin + 'addInfo', async(req,res)=>{
+    let sch  = await school.findOne({schoolId:req.body.id})
+    sch.infoBrd = req.body.Subjt
+    try{
+        sch.save()
+        res.json({code:1,msg:'successfully published information'})
+    }catch(e) {res.json({code:0,msg:'error: '+e})}
+}).post(schAdmin + 'savePhotoLink', async(req,res)=>{
+    let sch = await school.findOne({schoolId:req.body.schId})
+    sch[req.body.type] = req.body.link
+    console.log(req.body)
+    try{
+       await sch.save()
+       res.json({code:1})
+    }catch(e){
+        console.log(e)
+        res.json({code:0,msg:e})
+    }
+})
+.get(schAdmin + 'getList',async(req,res)=>{
     if(req.query.type=="S"){
         res.json(await Student.find({schId:req.query.schId}).limit(50))    
     } else if(req.query.type=="T"){
@@ -486,6 +507,32 @@ if(!arr.includes(req.body.id)){
 }).get(schAdmin+'getSubclass/:id/:schId',async(req,res)=>{
     let yu = await school.findOne({schoolId:req.params.schId})
     res.json(yu['subClasses'])
+}).get(schAdmin+'stdtsNotPrmtd/:schId',async(req,res)=>{
+    let sch = await school.findOne({schoolId:req.params.schId})
+    let hld = JSON.parse(sch.sessionPromoted)
+    let yu = (new Date().getFullYear() - 1).toString() + '/'+new Date().getFullYear().toString() 
+   let finArr = []
+   let rt = {}
+    for (let index = 0; index < hld[yu].length; index++) {
+    const element = hld[yu][index];
+    let st = await Student.findOne({id:element})
+    // console.log("id: &s,Name: &s, ",element,st['name'])
+    // console.log()
+    if(!st){
+        rt = {name:'not found',class:'not found',scr:'not found'}
+        finArr.push(rt)
+    }else{
+
+        rt = {name:st['name'],stdntId:st['id'],class:st['subclass']}
+        rt['score'] = await promoter.calccForSingleStdnt(element,yu)
+        finArr.push(rt)
+    }
+
+   }
+   res.json({code:1,msg:finArr})
+    // promoter.calccForSingleStdnt()
+    // console.log(yu)
+
 })
     // result section
 .post(rslt + 'submitResult', async (req, res) => {
@@ -544,6 +591,18 @@ mstr.get(rslt + 'getRslt', async (req, res) => {
         req.params.term, req.params.session + "/" + req.params.sen))
 }).get(schAdmin + 'stdntPins/:id', async (req, res) => {
     res.json(await pin.myPins(req.params.id))
+}).get(schAdmin + 'getRdmDet',async(req,res)=>{
+    let details = null;
+   try{
+       if(req.query.type = 'school'){
+           details = await school.findOne({schoolId:req.query.id})
+       res.json({code:1,msg:details})
+        }else if(req.query.type = 'student'){}
+       else if(req.query.type = 'teacher'){}
+   }catch(e){
+    res.json({code:1,msg:'error occured: '+e})
+
+   }
 })
 
 // Update Student Info
