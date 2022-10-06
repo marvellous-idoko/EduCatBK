@@ -11,9 +11,6 @@ var mongoose = require("mongoose");
 const master = require('./master')
 const school = require('./school')
 
-// app.use(cors());
-// app.options('*', cors())
-
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
