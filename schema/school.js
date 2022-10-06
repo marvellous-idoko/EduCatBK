@@ -29,6 +29,6 @@ const school = mongoose.Schema({
     SchoolBanner:String,
     SchoolStamp:String,
     principalSign:String,
-
+    comments:{}
 })
 module.exports = mongoose.model('schoolw', school);

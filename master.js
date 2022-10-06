@@ -496,6 +496,16 @@ if(!arr.includes(req.body.id)){
         console.log(e)
         res.json({code:0,msg:e})
     }
+}).post(schAdmin + 'submitCmts', async(req,res)=>{
+    try{
+        let sch = await school.findOne({schoolId:req.body.schId})
+        console.log(req.body);sch.comments = req.body
+            await sch.save()
+        res.json({code:1})
+    }catch(e){
+        console.log(e)
+        res.json({code:0, msg:e})
+    }
 })
 .get(schAdmin + 'getList',async(req,res)=>{
     if(req.query.type=="S"){
