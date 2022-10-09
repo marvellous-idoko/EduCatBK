@@ -927,8 +927,17 @@ mstr.post('/mstr/createNewPwd', async (req, res) => {
 
 // Pin
 mstr.post('/pin/create', async (req, res) => {
-
-    pin.createPin(req.body.id, req.body.noOfT, res)
+    let pins = []
+    if(req.body.noOfPins > 1){
+        for (let index = 0; index < req.body.noOfPins; index++) {
+        pins.push(await pin.createPin(req.body.id, req.body.noOfT, res,req.body.schId))
+        }
+    res.json({ code: 1, msg: pins })
+    
+    }else{
+        let r = await pin.createPin(req.body.id, req.body.noOfT, res)
+        res.json({ code: 1, msg: r })
+    }
 })
 
 

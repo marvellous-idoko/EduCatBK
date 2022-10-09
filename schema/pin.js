@@ -10,7 +10,8 @@ const pin = mongoose.Schema({
     id:String,
     prchsdBy:String,
     session:String,
-    term:String
+    term:String,
+    schId:String
 })
 module.exports = mongoose.model('pin', pin);
 
