@@ -678,7 +678,6 @@ mstr.delete(schAdmin + 'deleteUser', async(req,res)=>{
 // Auth
 mstr.post(auth + 'login', async (req, res) => {
     var acct;
-    console.log(req.body)
     if (req.body.id.includes('@')) {
         console.log(req.body)
         console.log('mail')
@@ -691,11 +690,11 @@ mstr.post(auth + 'login', async (req, res) => {
         }
 
     } else {
-        if (await Auth.authId(req.body) == false)
+        if (await Auth.authId(req.body, res) == false)
 
             res.json({ code: 0, msg: "acct doesn't exist or password incorrect" })
         else {
-            acct = await Auth.authId(req.body)
+            acct = await Auth.authId(req.body,res)
             acct['pwd'] = ''
             res.json({ code: 1, msg: acct })
         }

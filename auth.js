@@ -38,8 +38,10 @@ module.exports = {
 
     },
 
-    authId: async function (authData) {
-        //Student
+    authId: async function (authData,res) {
+        //Student`
+        try{
+
         var acct = await student.findOne({ id: authData.id })
         // console.log(acct)
 
@@ -89,6 +91,9 @@ module.exports = {
                 return false;
             }
         }
+    }catch(e){
+        res.json({code:0,msg:'error occurred on sign in'+e})
     }
+}
 }
 
