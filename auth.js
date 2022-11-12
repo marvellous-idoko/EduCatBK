@@ -5,38 +5,38 @@ const student = require('./schema/student')
 const crypto = require('crypto')
 
 module.exports = {
-    authMail: async function (authData) {
-        var acct = teacher.findOne({ email: authData.id })
-        if (acct == null) {
-            acct = school.findOne({ email: authData.id })
-            if (acct == null) { return false }
-            else {
+    // authMail: async function (authData) {
+    //     var acct = teacher.findOne({ email: authData.id })
+    //     if (acct == null) {
+    //         acct = school.findOne({ email: authData.id })
+    //         if (acct == null) { return false }
+    //         else {
 
-                let hash = crypto.pbkdf2Sync(authData.pwd,
-                    acct.salt, 1000, 64, `sha512`).toString(`hex`);
+    //             let hash = crypto.pbkdf2Sync(authData.pwd,
+    //                 acct.salt, 1000, 64, `sha512`).toString(`hex`);
 
-                if (acct.pwd == hash) {
+    //             if (acct.pwd == hash) {
 
-                    return acct;
-                } else {
-                    return false;
-                }
-            }
+    //                 return acct;
+    //             } else {
+    //                 return false;
+    //             }
+    //         }
 
-        } else {
+    //     } else {
 
-            let hash = crypto.pbkdf2Sync(authData.pwd,
-                acct.salt, 1000, 64, `sha512`).toString(`hex`);
+    //         let hash = crypto.pbkdf2Sync(authData.pwd,
+    //             acct.salt, 1000, 64, `sha512`).toString(`hex`);
 
-            if (acct.pwd == hash) {
+    //         if (acct.pwd == hash) {
 
-                return acct;
-            } else {
-                return false;
-            }
-        }
+    //             return acct;
+    //         } else {
+    //             return false;
+    //         }
+    //     }
 
-    },
+    // },
 
     authId: async function (authData,res) {
         //Student`
@@ -55,7 +55,6 @@ module.exports = {
                 if (acct == null)
                     return false
                 else {
-                    console.log(acct.salt)
                     let hash = crypto.pbkdf2Sync(authData.pwd,
                         acct.salt, 1000, 64, `sha512`).toString(`hex`);
 
@@ -92,8 +91,66 @@ module.exports = {
             }
         }
     }catch(e){
+        console.log(e)
         res.json({code:0,msg:'error occurred on sign in'+e})
     }
+},
+authMail: async function (authData,res) {
+    //Student`
+    try{
+
+    var acct = await student.findOne({ email: authData.id })
+    // console.log(acct)
+
+    if (acct == null) {
+        //Teacher
+        acct = await teacher.findOne({ email: authData.id })
+        // console.log(acct)
+        if (acct == null) {
+            //school
+            acct = await school.findOne({ email: authData.id })
+            if (acct == null)
+                return false
+            else {
+                let hash = crypto.pbkdf2Sync(authData.pwd,
+                    acct.salt, 1000, 64, `sha512`).toString(`hex`);
+
+                if (acct.pwd == hash) {
+
+                    return acct;
+                } else {
+                    return false;
+                }
+            }
+        }
+        else {
+
+            let hash = crypto.pbkdf2Sync(authData.pwd,
+                acct.salt, 1000, 64, `sha512`).toString(`hex`);
+
+            if (acct.pwd == hash) {
+
+                return acct;
+            } else {
+                return false;
+            }
+        }
+    } else {
+
+        let hash = crypto.pbkdf2Sync(authData.pwd,
+            acct.salt, 1000, 64, `sha512`).toString(`hex`);
+
+        if (acct.pwd == hash) {
+
+            return acct;
+        } else {
+            return false;
+        }
+    }
+}catch(e){
+    console.log(e)
+    res.json({code:0,msg:'error occurred on sign in'+e})
+}
 }
 }
 
