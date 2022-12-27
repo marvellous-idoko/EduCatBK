@@ -4,7 +4,7 @@ var express = require("express");
 var app = express();
 
 var cors = require("cors");
-app.use(cors({origin: ['https://reportkad.netlify.app','https://marvellous-idoko.github.io/EduRepo','http://localhost:4200']}));
+app.use(cors({origin: ['https://reportkad.netlify.app','https://marvellous-idoko.github.io/EduRepo','http://localhost:4200','http://localhost:8080']}));
 // app.use(cors({origin: 'http://localhost:4200'}));
 
 var mongoose = require("mongoose");
@@ -32,7 +32,7 @@ mongoose.connection.on('error',(err)=>{
 
 
 // app.use('/school', school)
-app.use('/master', master)
+// app.use('/master', master)
 app.use('/', master)
 // app.use('/', school)
 
