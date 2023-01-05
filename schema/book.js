@@ -17,6 +17,9 @@ const book = mongoose.Schema({
     chapters:Array(),
     genres:Array(),
     comments:Array(),
+    preface:String,
+    content:String,
+    ack:String,
 
 })
 module.exports = mongoose.model('book', book);

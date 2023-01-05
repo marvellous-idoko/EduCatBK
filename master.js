@@ -992,22 +992,17 @@ mstr.post('/apiTuto/auth/register', async (req, res) => {
             usere.account_no = account_no
             let y = await usere.save()
             console.log(y)
-                // let msg = `
-                // <h1> Here is your school ID: ${y['schoolId']}</h1>
-                // <p>Confirm your Email by click the below button</p><br>
-                // <a href="${mainSite}School-Admin/actAcct/${y['schoolId']}"> 
-                // <button style="    padding: 10px;
-                // background-color: #067606;
-                // color: white;
-                // border: 0;
-                // border-radius: 5px;"><h1>Reset Password</h1></button>`
-                // let emailWrap = {
-                //     from: 'reportkad@outlook.com',
-                //     to: y['email'],
-                //     subject: 'Tuto Free Book App: Confirm Email <no reply>',
-                //     html: msg
-                // };
-                // mailer.mailFree(emailWrap)
+                let msg = `
+                <h1> Here is your Welcome Bonus Code: ${"TOYO"+Math.floor(Math.random() * 10000)}</h1>
+                <i>Much Love From TOYO</i>
+                `
+                let emailWrap = {
+                    from: 'reportkad@outlook.com',
+                    to: y['email'],
+                    subject: 'Tuto Free Book App: Confirm Email <no reply>',
+                    html: msg
+                };
+                mailer.mailFree(emailWrap)
                 res.json({ code: 1, msg: 'success, check your mail to confirm your email' })
             // res.json({code:1,msg:y})
         }
@@ -1058,7 +1053,7 @@ mstr.get('/apiTuto/getResource', async(req,res)=>{
     let resr = null
     try{
         if(req.query.type == 'user'){
-            resr = await tutoUser.findOne({id:req.query.id})
+            resr = await tutoUser.findOne({account_no:req.query.id})
             if(req.query.cat == 'photo'){
                 sendData(resr.photo)
             }
@@ -1145,8 +1140,29 @@ mstr.get('/apiTuto/getResource', async(req,res)=>{
     console.log(e)
    }
 }).get("/apiTuto/listBooks",async(req,res)=>{
-    res.json(await book.find())
-}).get('/apiTuto/admin/dashoardInfo',async(req,res)=>{
+    res.json(await book.find().limit(10))
+})
+.get('/apiTuto/getComments',async(req,res)=>{
+    let re = (await book.findOne({bookId:req.query.bookId}))['comments']
+    res.json({code:1,msg:re})
+
+}).get('/apiTuto/comment',async(req,res)=>{
+    console.log(req.query)
+    try{
+        let re = (await book.findOne({bookId:req.query.bookId}))
+        re['comments'].push({user:req.query.user,value:req.query.value})
+        await re.save()
+        res.json({code:1,msg:re})
+    }catch(e){
+        console.log(e)
+        res.json({code:0,msg:'error: '+e})
+    }
+
+}).get('/apiTuto/getCommentCount',async(req,res)=>{
+    let re = (await book.findOne({bookId:req.query.bookId}))['comments']
+    res.json({code:1,msg:re.length})
+})
+.get('/apiTuto/admin/dashoardInfo',async(req,res)=>{
     let y = {}
     try{
 
@@ -1159,7 +1175,12 @@ mstr.get('/apiTuto/getResource', async(req,res)=>{
         console.log(e)
         res.json({code:0,msg:e})
     }
-})
+}).get('/apiTuto/admin/list', async(req,res)=>{
+    let y = await book.find().limit(10)
+    let yw = await author.find().limit(10)
+
+    res.json({code:1,msg:{bk:y,atr:yw}})
+    })
 
 mstr.post('/apiTuto/admin/addAuthor',async(req,res)=>{
     console.log(req.body)
@@ -1189,14 +1210,17 @@ mstr.post('/apiTuto/admin/uploadBook',async(req,res)=>{
     y['author'] = req.body.author
     y['aboutBook'] = req.body.about
     y['genres'] = req.body.genres
+    y['preface'] = req.body.preface
+    y['content'] = req.body.table
+    y['ack'] = req.body.ack
     y['noOfStars'] = req.body.stars
     y['chapters'] = [
-        {chapter1:req.body.chapter1},
-        {chapter2:req.body.chapter2},
-        {chapter3:req.body.chapter3},
-        {chapter4:req.body.chapter4},
-        {chapter5:req.body.chapter5},
-        {chapter6:req.body.chapter6},
+        // {chapter1:req.body.chapter1},
+        // {chapter2:req.body.chapter2},
+        // {chapter3:req.body.chapter3},
+        // {chapter4:req.body.chapter4},
+        // {chapter5:req.body.chapter5},
+        // {chapter6:req.body.chapter6},
     ]
     y['genres'] = req.body.genres
     y['price'] = req.body.price
@@ -1211,8 +1235,12 @@ mstr.post('/apiTuto/admin/uploadBook',async(req,res)=>{
         console.log(e)
         res.json({code:0,msg:'error: '+e})
     }
+}).post('/apiTuto/admin/addChapter', async(req,res)=>{
+    let y = await book.findOne({bookId:req.body.id})
+    y['chapters'].push({'chapter':req.body.chp})
+    y.save()
+    res.json({code:1,msg:'successfully added chapter'})
 })
-
 
 mstr.post('/nataReg', async (req, res) => {
    try{
