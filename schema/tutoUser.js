@@ -26,7 +26,8 @@ const user = mongoose.Schema({
     actCodeUsed:Boolean,
     hash:String,
     salt:String,
-    contact:String
+    contact:String,
+    favAut:String
 })
 
 user.methods.setPassword = function (password) {

@@ -228,40 +228,40 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
         } else {
 
             // req.files.photo.mv(up, (err) => {
-                let newStdnt = new Student()
-                let hash = pwdHasher('123456')
-                newStdnt.name = jui.name
-                newStdnt.id = sch.SchoolName.slice(0, sch.SchoolName.indexOf(" ")) + Math.floor(Math.random() * 100000)
-                newStdnt.class = jui.class
-                newStdnt.subclass = jui.subClass
-                newStdnt.contact = jui.pCont
-                newStdnt.dateREg = new Date()
-                newStdnt.schId = sch.schoolId
-                newStdnt.height = jui.height
-                newStdnt.weight = jui.weight
-                newStdnt.DoB = jui.DoB
-                newStdnt.sex = jui.sex
-                newStdnt.bGrp = jui.bGrp
-                newStdnt.pwd = hash.hash
-                newStdnt.salt = hash.salt
-                // newStdnt.photo = devSrvr + up.slice(27)
-                newStdnt.photo = jui.photo
-                // newStdnt.photo = prodSrvr + up
-                console.log(newStdnt)
-                try {
-                    newStdnt.save((e, r) => {
-                        if (e) throw new Error('database error . .  ' + e)
-                        else {
-                            res.json({
-                                code: 1, msg: 'successfully added student, Here is your Student ID; ' +
-                                    r['id'] + '\n' + 'Your default password is 123456'
-                            })
-                        }
-                    })
-                } catch (e) {
-                    console.log(e)
-                    res.json({ code: 0, msg: e })
-                }
+            let newStdnt = new Student()
+            let hash = pwdHasher('123456')
+            newStdnt.name = jui.name
+            newStdnt.id = sch.SchoolName.slice(0, sch.SchoolName.indexOf(" ")) + Math.floor(Math.random() * 100000)
+            newStdnt.class = jui.class
+            newStdnt.subclass = jui.subClass
+            newStdnt.contact = jui.pCont
+            newStdnt.dateREg = new Date()
+            newStdnt.schId = sch.schoolId
+            newStdnt.height = jui.height
+            newStdnt.weight = jui.weight
+            newStdnt.DoB = jui.DoB
+            newStdnt.sex = jui.sex
+            newStdnt.bGrp = jui.bGrp
+            newStdnt.pwd = hash.hash
+            newStdnt.salt = hash.salt
+            // newStdnt.photo = devSrvr + up.slice(27)
+            newStdnt.photo = jui.photo
+            // newStdnt.photo = prodSrvr + up
+            console.log(newStdnt)
+            try {
+                newStdnt.save((e, r) => {
+                    if (e) throw new Error('database error . .  ' + e)
+                    else {
+                        res.json({
+                            code: 1, msg: 'successfully added student, Here is your Student ID; ' +
+                                r['id'] + '\n' + 'Your default password is 123456'
+                        })
+                    }
+                })
+            } catch (e) {
+                console.log(e)
+                res.json({ code: 0, msg: e })
+            }
             // })
         }
 
@@ -290,49 +290,49 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
     }
     else {
         let sch = await school.findOne({ schoolId: req.body.id })
-       console.log(typeof sch.sessionPromoted)
-        if(!sch.sessionPromoted){
-                var ft = await result.getReslts(req.body.session,req.body.id)
-                let allStdnts = await Student.find({ schId: req.body.id })
-                let notPromoted = []
-                let arrOfFailed = []
-                let yu = {}
-                for (let index = 0; index < allStdnts.length; index++) {
-                    let scr = await promoter.calccForSingleStdnt(allStdnts[index]['id'], req.body.session)
-                    // console.log('studtID: %s , scr:%s',allStdnts[index]['id'],scr)
-                    if (scr > 39) {
-                        //   console.log("former class: %s", (await Student.findOne({id:allStdnts[index]['id']}))['class'])
-                        //    console.log('new class %s',)
-                        await promoter.promoteStdnt(allStdnts[index]['id'])
-    
-                    }
-                    else {
-                        arrOfFailed.push(allStdnts[index]['id'])
-                        notPromoted.push({ stdntId: allStdnts[index]['id'], name: allStdnts[index]['name'], score: scr })
-    
-                    }
+        console.log(typeof sch.sessionPromoted)
+        if (!sch.sessionPromoted) {
+            var ft = await result.getReslts(req.body.session, req.body.id)
+            let allStdnts = await Student.find({ schId: req.body.id })
+            let notPromoted = []
+            let arrOfFailed = []
+            let yu = {}
+            for (let index = 0; index < allStdnts.length; index++) {
+                let scr = await promoter.calccForSingleStdnt(allStdnts[index]['id'], req.body.session)
+                // console.log('studtID: %s , scr:%s',allStdnts[index]['id'],scr)
+                if (scr > 39) {
+                    //   console.log("former class: %s", (await Student.findOne({id:allStdnts[index]['id']}))['class'])
+                    //    console.log('new class %s',)
+                    await promoter.promoteStdnt(allStdnts[index]['id'])
+
                 }
-                yu[req.body.session] = arrOfFailed
-                sch.sessionPromoted = JSON.stringify(yu)
-                try {
-                    let y = await sch.save()
-                    res.json(notPromoted)
-                } catch (e) {
-                    res.json({ code: 0, msg: e })
+                else {
+                    arrOfFailed.push(allStdnts[index]['id'])
+                    notPromoted.push({ stdntId: allStdnts[index]['id'], name: allStdnts[index]['name'], score: scr })
+
                 }
-    
-        }else{
+            }
+            yu[req.body.session] = arrOfFailed
+            sch.sessionPromoted = JSON.stringify(yu)
+            try {
+                let y = await sch.save()
+                res.json(notPromoted)
+            } catch (e) {
+                res.json({ code: 0, msg: e })
+            }
+
+        } else {
             let yuo = JSON.parse(sch.sessionPromoted)
             let promtd = Object.keys(yuo)
             if (promtd.includes(req.body.session)) {
                 res.json({ code: 0, msg: 'The students for this session are already promoted, you ca check ot pomoted list to promote a special student' })
             } else {
-                var ft = await result.getReslts(req.body.session,req.body.id)
+                var ft = await result.getReslts(req.body.session, req.body.id)
                 let allStdnts = await Student.find({ schId: req.body.id })
                 let notPromoted = []
                 let arrOfFailed = []
                 let yu = sch.sessionPromoted
-    
+
                 for (let index = 0; index < allStdnts.length; index++) {
                     let scr = await promoter.calccForSingleStdnt(allStdnts[index]['id'], req.body.session)
                     // console.log('studtID: %s , scr:%s',allStdnts[index]['id'],scr)
@@ -340,12 +340,12 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
                         //   console.log("former class: %s", (await Student.findOne({id:allStdnts[index]['id']}))['class'])
                         //    console.log('new class %s',)
                         await promoter.promoteStdnt(allStdnts[index]['id'])
-    
+
                     }
                     else {
                         arrOfFailed.push(allStdnts[index]['id'])
                         notPromoted.push({ stdntId: allStdnts[index]['id'], name: allStdnts[index]['name'], score: scr })
-    
+
                     }
                 }
                 yu[req.body.session] = arrOfFailed
@@ -358,7 +358,7 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
                 }
             }
         }
-        
+
     }
 
 
@@ -389,16 +389,16 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
     let tchr = await teacher.findOne({ teacherID: req.body.teacherId })
     tchr.name = req.body.personaleDet.name
     tchr.class = req.body.personaleDet.class
-    if(req.body.subjects != []){
+    if (req.body.subjects != []) {
         tchr.subject = req.body.subjects
-    }else{
-        
-    }
-     if(req.body.subClass != []){
-        tchr.subClass = req.body.subClass
-    }else{
+    } else {
 
-    }    
+    }
+    if (req.body.subClass != []) {
+        tchr.subClass = req.body.subClass
+    } else {
+
+    }
     try {
         await tchr.save()
         res.json({ code: 1, msg: 'successfully updated teacher' })
@@ -454,102 +454,102 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
         }
 
     }
-}).post(schAdmin + 'promoteSingleStdnt' ,async(req,res)=>{
-    let sch = await school.findOne({schoolId:req.body.schId})
-    let sessionPromtd = JSON.parse(sch.sessionPromoted) 
-    if(!req.body.session){
-    req.body.session = (new Date().getFullYear() - 1).toString() + '/'+new Date().getFullYear().toString() 
+}).post(schAdmin + 'promoteSingleStdnt', async (req, res) => {
+    let sch = await school.findOne({ schoolId: req.body.schId })
+    let sessionPromtd = JSON.parse(sch.sessionPromoted)
+    if (!req.body.session) {
+        req.body.session = (new Date().getFullYear() - 1).toString() + '/' + new Date().getFullYear().toString()
     }
     let arr = sessionPromtd[req.body.session]
 
-if(!arr.includes(req.body.id)){
-    res.json({code:0,msg:'student already promoted'})
-} else{
-    let stdnt = await Student.findOne({id:req.body.id})
-   stdnt.class = parseInt(stdnt.class) + 1
+    if (!arr.includes(req.body.id)) {
+        res.json({ code: 0, msg: 'student already promoted' })
+    } else {
+        let stdnt = await Student.findOne({ id: req.body.id })
+        stdnt.class = parseInt(stdnt.class) + 1
 
-   // remove stdnt from array of not promoted for that session
-   var filteredArray = arr.filter(function(e) { return e !== req.body.id })
-    sessionPromtd[req.body.session] = filteredArray
-  sch.sessionPromoted = JSON.stringify(sessionPromtd)
+        // remove stdnt from array of not promoted for that session
+        var filteredArray = arr.filter(function (e) { return e !== req.body.id })
+        sessionPromtd[req.body.session] = filteredArray
+        sch.sessionPromoted = JSON.stringify(sessionPromtd)
 
-  try{
-    await   sch.save()  
-    await stdnt.save()
-    res.json({code:1,msg:'successfully promoted student'})
-  }catch(e){
-    res.json({code:0,msg:e})
-  }
-}
+        try {
+            await sch.save()
+            await stdnt.save()
+            res.json({ code: 1, msg: 'successfully promoted student' })
+        } catch (e) {
+            res.json({ code: 0, msg: e })
+        }
+    }
 
-}).post(schAdmin + 'addInfo', async(req,res)=>{
-    let sch  = await school.findOne({schoolId:req.body.id})
+}).post(schAdmin + 'addInfo', async (req, res) => {
+    let sch = await school.findOne({ schoolId: req.body.id })
     sch.infoBrd = req.body.Subjt
-    try{
+    try {
         sch.save()
-        res.json({code:1,msg:'successfully published information'})
-    }catch(e) {res.json({code:0,msg:'error: '+e})}
-}).post(schAdmin + 'savePhotoLink', async(req,res)=>{
-    let sch = await school.findOne({schoolId:req.body.schId})
+        res.json({ code: 1, msg: 'successfully published information' })
+    } catch (e) { res.json({ code: 0, msg: 'error: ' + e }) }
+}).post(schAdmin + 'savePhotoLink', async (req, res) => {
+    let sch = await school.findOne({ schoolId: req.body.schId })
     sch[req.body.type] = req.body.link
     console.log(req.body)
-    try{
-       await sch.save()
-       res.json({code:1})
-    }catch(e){
+    try {
+        await sch.save()
+        res.json({ code: 1 })
+    } catch (e) {
         console.log(e)
-        res.json({code:0,msg:e})
+        res.json({ code: 0, msg: e })
     }
-}).post(schAdmin + 'submitCmts', async(req,res)=>{
-    try{
-        let sch = await school.findOne({schoolId:req.body.schId})
-        console.log(req.body);sch.comments = req.body
-            await sch.save()
-        res.json({code:1})
-    }catch(e){
+}).post(schAdmin + 'submitCmts', async (req, res) => {
+    try {
+        let sch = await school.findOne({ schoolId: req.body.schId })
+        console.log(req.body); sch.comments = req.body
+        await sch.save()
+        res.json({ code: 1 })
+    } catch (e) {
         console.log(e)
-        res.json({code:0, msg:e})
+        res.json({ code: 0, msg: e })
     }
 })
-.get(schAdmin + 'getList',async(req,res)=>{
-    if(req.query.type=="S"){
-        res.json(await Student.find({schId:req.query.schId}).limit(50))    
-    } else if(req.query.type=="T"){
-        res.json(await teacher.find({schId:req.query.schId}).limit(50))    
-        
-    }
-}).get(schAdmin+'getSubclass/:id/:schId',async(req,res)=>{
-    let yu = await school.findOne({schoolId:req.params.schId})
-    res.json(yu['subClasses'])
-}).get(schAdmin+'stdtsNotPrmtd/:schId',async(req,res)=>{
-    let sch = await school.findOne({schoolId:req.params.schId})
-    let hld = JSON.parse(sch.sessionPromoted)
-    let yu = (new Date().getFullYear() - 1).toString() + '/'+new Date().getFullYear().toString() 
-   let finArr = []
-   let rt = {}
-    for (let index = 0; index < hld[yu].length; index++) {
-    const element = hld[yu][index];
-    let st = await Student.findOne({id:element})
-    // console.log("id: &s,Name: &s, ",element,st['name'])
-    // console.log()
-    if(!st){
-        rt = {name:'not found',class:'not found',scr:'not found'}
-        finArr.push(rt)
-    }else{
+    .get(schAdmin + 'getList', async (req, res) => {
+        if (req.query.type == "S") {
+            res.json(await Student.find({ schId: req.query.schId }).limit(50))
+        } else if (req.query.type == "T") {
+            res.json(await teacher.find({ schId: req.query.schId }).limit(50))
 
-        rt = {name:st['name'],stdntId:st['id'],class:st['subclass']}
-        rt['score'] = await promoter.calccForSingleStdnt(element,yu)
-        finArr.push(rt)
-    }
+        }
+    }).get(schAdmin + 'getSubclass/:id/:schId', async (req, res) => {
+        let yu = await school.findOne({ schoolId: req.params.schId })
+        res.json(yu['subClasses'])
+    }).get(schAdmin + 'stdtsNotPrmtd/:schId', async (req, res) => {
+        let sch = await school.findOne({ schoolId: req.params.schId })
+        let hld = JSON.parse(sch.sessionPromoted)
+        let yu = (new Date().getFullYear() - 1).toString() + '/' + new Date().getFullYear().toString()
+        let finArr = []
+        let rt = {}
+        for (let index = 0; index < hld[yu].length; index++) {
+            const element = hld[yu][index];
+            let st = await Student.findOne({ id: element })
+            // console.log("id: &s,Name: &s, ",element,st['name'])
+            // console.log()
+            if (!st) {
+                rt = { name: 'not found', class: 'not found', scr: 'not found' }
+                finArr.push(rt)
+            } else {
 
-   }
-   res.json({code:1,msg:finArr})
-    // promoter.calccForSingleStdnt()
-    // console.log(yu)
+                rt = { name: st['name'], stdntId: st['id'], class: st['subclass'] }
+                rt['score'] = await promoter.calccForSingleStdnt(element, yu)
+                finArr.push(rt)
+            }
 
-})
+        }
+        res.json({ code: 1, msg: finArr })
+        // promoter.calccForSingleStdnt()
+        // console.log(yu)
+
+    })
     // result section
-.post(rslt + 'submitResult', async (req, res) => {
+    .post(rslt + 'submitResult', async (req, res) => {
         let ty = await school.findOne({ schoolId: req.body.schId })
         console.log(req.body)
         if (ty['portal'] == true) {
@@ -563,11 +563,12 @@ if(!arr.includes(req.body.id)){
             res.json({ code: 0, msg: 'portal closed, contact admin' })
         }
     })
-mstr.get(rslt + 'getBrdSht',async(req,res)=>{
-   try{ res.json(await Result.find(req.query))
-}catch(e){
-    res.json({code:0,msg:'error occured'})
-}
+mstr.get(rslt + 'getBrdSht', async (req, res) => {
+    try {
+        res.json(await Result.find(req.query))
+    } catch (e) {
+        res.json({ code: 0, msg: 'error occured' })
+    }
 })
 
 function pwdHasher(pwd) {
@@ -602,18 +603,18 @@ mstr.get(rslt + 'getRslt', async (req, res) => {
         req.params.term, req.params.session + "/" + req.params.sen))
 }).get(schAdmin + 'stdntPins/:id', async (req, res) => {
     res.json(await pin.myPins(req.params.id))
-}).get(schAdmin + 'getRdmDet',async(req,res)=>{
+}).get(schAdmin + 'getRdmDet', async (req, res) => {
     let details = null;
-   try{
-       if(req.query.type = 'school'){
-           details = await school.findOne({schoolId:req.query.id})
-       res.json({code:1,msg:details})
-        }else if(req.query.type = 'student'){}
-       else if(req.query.type = 'teacher'){}
-   }catch(e){
-    res.json({code:1,msg:'error occured: '+e})
+    try {
+        if (req.query.type = 'school') {
+            details = await school.findOne({ schoolId: req.query.id })
+            res.json({ code: 1, msg: details })
+        } else if (req.query.type = 'student') { }
+        else if (req.query.type = 'teacher') { }
+    } catch (e) {
+        res.json({ code: 1, msg: 'error occured: ' + e })
 
-   }
+    }
 })
 
 // Update Student Info
@@ -655,25 +656,25 @@ mstr.get(schAdmin + 'getSubClasses/:id', async (req, res) => {
 }).get(schAdmin + 'stdntDet/:id', async (req, res) => {
     res.json(await Student.findOne({ id: req.params.id }))
 })
-mstr.delete(schAdmin + 'deleteUser', async(req,res)=>{
+mstr.delete(schAdmin + 'deleteUser', async (req, res) => {
     let u = null
     console.log(req.query)
-    if(req.query.userType == 'T'){
-       try{
-        await teacher.findByIdAndDelete(req.query.id)
-        res.json({code:1,msg:"successfully deleted"})
-       }catch(e){
-        res.json({code:0,msg:e})
-       }
-    }else if(req.query.userType == 'S'){
-        try{
-        await Student.findByIdAndDelete(req.query.id)
-        res.json({code:1,msg:"successfully deleted"})
-        }catch(e){
-        res.json({code:0,msg:e})
-       }
-    }    
-    })
+    if (req.query.userType == 'T') {
+        try {
+            await teacher.findByIdAndDelete(req.query.id)
+            res.json({ code: 1, msg: "successfully deleted" })
+        } catch (e) {
+            res.json({ code: 0, msg: e })
+        }
+    } else if (req.query.userType == 'S') {
+        try {
+            await Student.findByIdAndDelete(req.query.id)
+            res.json({ code: 1, msg: "successfully deleted" })
+        } catch (e) {
+            res.json({ code: 0, msg: e })
+        }
+    }
+})
 
 
 // Auth
@@ -682,7 +683,7 @@ mstr.post(auth + 'login', async (req, res) => {
     if (req.body.id.includes('@')) {
         console.log(req.body.id)
         console.log('mail')
-        if (await Auth.authMail(req.body,res) == false)
+        if (await Auth.authMail(req.body, res) == false)
             res.json({ code: 0, msg: "acct doesn't exist or password incorrect" })
         else {
             acct = await Auth.authMail(req.body)
@@ -695,7 +696,7 @@ mstr.post(auth + 'login', async (req, res) => {
 
             res.json({ code: 0, msg: "acct doesn't exist or password incorrect" })
         else {
-            acct = await Auth.authId(req.body,res)
+            acct = await Auth.authId(req.body, res)
             acct['pwd'] = ''
             res.json({ code: 1, msg: acct })
         }
@@ -719,9 +720,9 @@ mstr.get(teacherApi + "getStudents/:id/:schId/:class", async (req, res) => {
 }).get(teacherApi + 'getTchrSubClasses/:id', async (req, res) => {
     let lTeacher = await teacher.findOne({ teacherID: req.params.id })
     res.json(lTeacher)
-}).get(teacherApi + 'getTchrSubject/:id/:schId',async (req,res)=>{
+}).get(teacherApi + 'getTchrSubject/:id/:schId', async (req, res) => {
     console.log(req.params)
-    let io = await teacher.findOne({ teacherID: req.params.id,schId:req.params.schId });res.json(io['subject'])
+    let io = await teacher.findOne({ teacherID: req.params.id, schId: req.params.schId }); res.json(io['subject'])
 })
 mstr.get(teacherApi + "getMoreStudents/:id", async (req, res) => {
     let lTeacher = await teacher.findOne({ teacherID: req.params.id })
@@ -729,8 +730,8 @@ mstr.get(teacherApi + "getMoreStudents/:id", async (req, res) => {
 })
 mstr.post(teacherApi + "checkResults", async (req, res) => {
     // console.log(req.body)
-    let array = await Student.find({ class: req.body.class, subclass: req.body.subclass,schId:req.body.schId })
-    let arr = await result.checkResultBeforeSubmit({class:req.body.class,subclass:req.body.subclass,schId:req.body.schId,session:req.body.session,subject:req.body.subject,term:req.body.term})
+    let array = await Student.find({ class: req.body.class, subclass: req.body.subclass, schId: req.body.schId })
+    let arr = await result.checkResultBeforeSubmit({ class: req.body.class, subclass: req.body.subclass, schId: req.body.schId, session: req.body.session, subject: req.body.subject, term: req.body.term })
     if (arr.length == 0) {
         res.json(arr)
     }
@@ -928,13 +929,13 @@ mstr.post('/mstr/createNewPwd', async (req, res) => {
 // Pin
 mstr.post('/pin/create', async (req, res) => {
     let pins = []
-    if(req.body.noOfPins > 1){
+    if (req.body.noOfPins > 1) {
         for (let index = 0; index < req.body.noOfPins; index++) {
-        pins.push(await pin.createPin(req.body.id, req.body.noOfT, res,req.body.schId))
+            pins.push(await pin.createPin(req.body.id, req.body.noOfT, res, req.body.schId))
         }
-    res.json({ code: 1, msg: pins })
-    
-    }else{
+        res.json({ code: 1, msg: pins })
+
+    } else {
         let r = await pin.createPin(req.body.id, req.body.noOfT, res)
         res.json({ code: 1, msg: r })
     }
@@ -947,20 +948,20 @@ mstr.post('/pin/create', async (req, res) => {
 
 
 mstr.post('/apiTuto/auth/login', async (req, res) => {
-    let r = await tutoUser.findOne({email:req.body.email})
+    let r = await tutoUser.findOne({ email: req.body.email })
     console.log(r)
-    if(r == null){
-        res.json({code:0,msg:'account not found'})
-    }else{
-       if(await r.validPassword(req.body.pwd)){
-        r.hash = ''
-        r.salt = ''
-        res.json({code:1,msg:r})
-       }
-       else{
-        res.json({code:0,msg:'incorrect password'})
+    if (r == null) {
+        res.json({ code: 0, msg: 'account not found' })
+    } else {
+        if (await r.validPassword(req.body.pwd)) {
+            r.hash = ''
+            r.salt = ''
+            res.json({ code: 1, msg: r })
+        }
+        else {
+            res.json({ code: 0, msg: 'incorrect password' })
 
-       }
+        }
     }
 
 })
@@ -971,7 +972,7 @@ mstr.post('/apiTuto/auth/register', async (req, res) => {
     // console.log(await usere.findOne({id:"ddd"}))
 
     try {
-        let io = await tutoUser.find({email:req.body.email})
+        let io = await tutoUser.find({ email: req.body.email })
         if (io.length != 0) {
             res.json({ code: 0, msg: 'account already exists' })
         } else {
@@ -981,226 +982,306 @@ mstr.post('/apiTuto/auth/register', async (req, res) => {
             usere.genres = req.body.genres
             usere.contact = req.body.contact
             usere.setPassword(req.body.pwd)
-            
+
             let account_no = Math.floor(Math.random() * 10000000000)
-            let yu = await tutoUser.find({account_no:account_no})
+            let yu = await tutoUser.find({ account_no: account_no })
             console.log(yu)
-            while(yu.length != 0){
+            while (yu.length != 0) {
                 account_no = Math.floor(Math.random() * 10000000000)
-                yu = await tutoUser.find({account_no:account_no})
+                yu = await tutoUser.find({ account_no: account_no })
             }
             usere.account_no = account_no
             let y = await usere.save()
             console.log(y)
-                let msg = `
-                <h1> Here is your Welcome Bonus Code: ${"TOYO"+Math.floor(Math.random() * 10000)}</h1>
+            let msg = `
+                <h1> Here is your Welcome Bonus Code: ${"TOYO" + Math.floor(Math.random() * 10000)}</h1>
                 <i>Much Love From TOYO</i>
                 `
-                let emailWrap = {
-                    from: 'reportkad@outlook.com',
-                    to: y['email'],
-                    subject: 'Tuto Free Book App: Confirm Email <no reply>',
-                    html: msg
-                };
-                mailer.mailFree(emailWrap)
-                res.json({ code: 1, msg: 'success, check your mail to confirm your email' })
+            let emailWrap = {
+                from: 'reportkad@outlook.com',
+                to: y['email'],
+                subject: 'Tuto Free Book App: Confirm Email <no reply>',
+                html: msg
+            };
+            mailer.mailFree(emailWrap)
+            res.json({ code: 1, msg: 'success, check your mail to confirm your email' })
             // res.json({code:1,msg:y})
         }
-    }catch(e){
+    } catch (e) {
         console.log(e)
         res.json({ code: 0, msg: e })
     }
 })
-mstr.get('/apiTuto/getBookRead',async(req,res)=>{
-   try{
-    let user = await tutoUser.findOne({id:req.query.userId})
-   if(user !=null){
-    let y = []
-    if(user.listOfPurchasedBooks.includes(req.query.bookId)){
-        let bk = await book.findOne()
-        res.json({code:1,msg:bk})
-    }
-    else if(user.listOfBooksReadingByCoins.includes(req.query.bookId)){
-        
-    }
-   }else{
+mstr.get('/apiTuto/getBookRead', async (req, res) => {
+    try {
+        let user = await tutoUser.findOne({ id: req.query.userId })
+        if (user != null) {
+            let y = []
+            if (user.listOfPurchasedBooks.includes(req.query.bookId)) {
+                let bk = await book.findOne()
+                res.json({ code: 1, msg: bk })
+            }
+            else if (user.listOfBooksReadingByCoins.includes(req.query.bookId)) {
 
-   }
-}catch(e){
-    console.log(e)
-    res.json({code:0,msg:e})
-}
-})
-.post('/apiTuto/commentAboutBook',async(req,res)=>{
-    try{
-    let bk = book.findOne({id:req.query.bookId})
-    let cmts = bk.comments
-    let cmt = {userId:req.query.userId,comment:req.query.comment}
-    cmts.push(cmt)
-    cmts.save()
-    }
-    catch(e){
+            }
+        } else {
+
+        }
+    } catch (e) {
         console.log(e)
-        res.json({code:0,msg:e})
+        res.json({ code: 0, msg: e })
     }
 })
-mstr.get('/apiTuto/getResource', async(req,res)=>{
-    console.log(req.query)
+    .post('/apiTuto/commentAboutBook', async (req, res) => {
+        try {
+            let bk = book.findOne({ id: req.query.bookId })
+            let cmts = bk.comments
+            let cmt = { userId: req.query.userId, comment: req.query.comment }
+            cmts.push(cmt)
+            cmts.save()
+        }
+        catch (e) {
+            console.log(e)
+            res.json({ code: 0, msg: e })
+        }
+    })
+mstr.get('/apiTuto/getResource', async (req, res) => {
     function sendData(data) {
-        console.log(data)
-        res.json({code:1,msg:data})
+        res.json({ code: 1, msg: data })
     }
     let resr = null
-    try{
-        if(req.query.type == 'user'){
-            resr = await tutoUser.findOne({account_no:req.query.id})
-            if(req.query.cat == 'photo'){
+    try {
+        if (req.query.type == 'user') {
+            resr = await tutoUser.findOne({ account_no: req.query.id })
+            if (req.query.cat == 'photo') {
                 sendData(resr.photo)
             }
-            else if (req.query.cat == 'name'){
+            else if (req.query.cat == 'name') {
                 sendData(resr.name)
             }
-            else if (req.query.cat == 'about'){
+            else if (req.query.cat == 'about') {
                 sendData(resr.about)
             }
-            else if (req.query.cat == 'stars'){
+            else if (req.query.cat == 'stars') {
                 sendData(resr.stars)
             }
-            else{
+            else {
                 sendData(resr.comments)
             }
         }
-        else if(req.query.type == 'author'){
-            resr = await author.findOne({id:req.query.id})
-        //    console.log(resr)
-            if(req.query.cat == 'photo'){
+        else if (req.query.type == 'author') {
+            resr = await author.findOne({ id: req.query.id })
+            //    console.log(resr)
+            if (req.query.cat == 'photo') {
                 sendData(resr.photo)
             }
-            else if (req.query.cat == 'name'){
+            else if (req.query.cat == 'name') {
                 sendData(resr['name'])
             }
-            else if (req.query.cat == 'about'){
+            else if (req.query.cat == 'about') {
                 sendData(resr.about)
             }
-            else if (req.query.cat == 'stars'){
+            else if (req.query.cat == 'stars') {
                 sendData(resr.stars)
             }
-            else{
+            else {
                 sendData(resr.comments)
             }
         }
-            else if(req.query.type == 'book'){
-            resr = await book.findOne({id:req.query.id})
-               
-                if(req.query.cat == 'link'){
-                    sendData(resr.link)
+        else if (req.query.type == 'book') {
+            resr = await book.findOne({ id: req.query.id })
+
+            if (req.query.cat == 'link') {
+                sendData(resr.link)
+            }
+            else if (req.query.cat == 'title') {
+                sendData(resr.title)
+            }
+            else if (req.query.cat == 'about') {
+                sendData(resr.about)
+            }
+            else if (req.query.cat == 'stars') {
+                sendData(resr.noOfStars)
+            }
+
+            else if (req.query.cat == 'comment') {
+                sendData(resr.comments)
+            }
+            else {
+                sendData(resr.comments)
+
+            }
+        }
+    }
+    catch (e) {
+        console.log(e)
+        res.json({ code: 0, msg: e })
+    }
+})
+    .get('/apiTuto/getBook', async (req, res) => {
+        try {
+            console.log(req.query.bookId)
+            res.json(await book.findOne({ bookId: req.query.bookId }))
+        } catch (e) {
+            res.json({ code: 0, msg: "error: " + e })
+        }
+
+    }).get("/apiTuto/admin/getAuthors", async (req, res) => {
+        try {
+            let y = await author.find()
+            let resw = []
+            for (let index = 0; index < y.length; index++) {
+                resw.push({ id: y[index]['id'], name: y[index]['name'] })
+            }
+            res.json({ code: 1, msg: resw })
+        } catch (e) {
+            res.json({ code: 0, msg: 'error: ' + e })
+            console.log(e)
+        }
+    }).get("/apiTuto/listBooks", async (req, res) => {
+        let u = await tutoUser.findOne({ account_no: req.query.account_no })
+        let bks = await book.find()
+        let re = []
+        let nor = []
+        let max = 0
+        let hldr = {}
+        let mstRtd = []
+        // console.log(u)
+        // console.log(req.query)
+
+        if (req.query.cat == 'bksforyou') {
+            try {
+                for (let index = 0; index < u['genres'].length; index++) {
+                    for (let indexx = 0; indexx < bks.length; indexx++) {
+                        if (bks[indexx]['genres'].includes(u['genres'][index])) {
+                            re.push(bks[indexx])
+                        }
+                    }
                 }
-                else if (req.query.cat == 'title'){
-                    sendData(resr.title)
-                }
-                else if (req.query.cat == 'about'){
-                    sendData(resr.about)
-                }
-                else if (req.query.cat == 'stars'){
-                    sendData(resr.noOfStars)
-                }
+            }
+
+            catch (e) {
+                console.log("error: " + e)
+            }
+        }
+        else if (req.query.cat == 'genres') {
+            try {
                 
-                else if (req.query.cat == 'comment'){
-                    sendData(resr.comments)
-                }
-                else{
-                    sendData(resr.comments)
-                    
-                }
-        }
-    }
-    catch(e){
-        console.log(e)
-        res.json({code:0,msg:e})
-        }
-})
-.get('/apiTuto/getBook', async(req,res)=>{
-    try {
-        console.log(req.query.bookId)
-        res.json(await book.findOne({ bookId: req.query.bookId }))
-    } catch (e) {
-        res.json({ code: 0, msg: "error: " + e })
-    }
+                for (let indexx = 0; indexx < bks.length; indexx++) {
+                    if (bks[indexx]['genres'].includes(req.query.genre)) {
+                        re.push(bks[indexx])
+                    }
     
-}).get("/apiTuto/admin/getAuthors", async(req,res)=>{
-   try{
-       let y = await author.find()
-       let resw = []
-       for (let index = 0; index < y.length; index++) {
-               resw.push({id:y[index]['id'],name:y[index]['name']})        
-       }
-       res.json({code:1,msg:resw})
-   }catch(e){
-    res.json({code:0,msg:'error: '+e})
-    console.log(e)
-   }
-}).get("/apiTuto/listBooks",async(req,res)=>{
-    res.json(await book.find().limit(10))
-})
-.get('/apiTuto/getComments',async(req,res)=>{
-    let re = (await book.findOne({bookId:req.query.bookId}))['comments']
-    res.json({code:1,msg:re})
+                }
+            } catch (error) {
+                console.log("err"+error)
+            }
+        }
 
-}).get('/apiTuto/comment',async(req,res)=>{
+        else if (req.query.cat == 'popular') {
+            for (let indexx = 0; indexx < bks.length; indexx++) {
+                nor.push(bks['noOfReads'])
+            }
+            nor.sort(function (a, b) { return a - b })
+            for (let index = 0; index < 5; index++) {
+                re.push(await book.findOne({ noOfReads: nor[index] }))
+            }
+        }
+        else if (req.query.cat = 'mostRated') {
+            for (let indexx = 0; indexx < bks.length; indexx++) {
+                mstRtd.push(bks[indexx]['noOfStars'])
+            // console.log(await bks[indexx]['noOfStars'])
+            }
+            mstRtd.sort(function (a, b) { return b - a })
+            for (let index = 0; index < 5; index++) {
+                // mstRtd[index]
+                console.log(mstRtd[index])
+                // console.log(await book.findOne({ noOfStars:mstRtd[index] }))
+                re.push(await book.findOne({ noOfStars: mstRtd[index] }))
+            }
+        }
+
+
+        res.json(await re)
+    })
+function arrayMin(arr) {
+    var len = arr.length, min = Infinity;
+    while (len--) {
+        if (arr[len] < min) {
+            min = arr[len];
+        }
+    }
+    return min;
+};
+
+function arrayMax(arr) {
+    var len = arr.length, max = -Infinity;
+    while (len--) {
+        if (arr[len] > max) {
+            max = arr[len];
+        }
+    }
+    return max;
+};
+mstr.get('/apiTuto/getComments', async (req, res) => {
+    let re = (await book.findOne({ bookId: req.query.bookId }))['comments']
+    res.json({ code: 1, msg: re })
+
+}).get('/apiTuto/comment', async (req, res) => {
     console.log(req.query)
-    try{
-        let re = (await book.findOne({bookId:req.query.bookId}))
-        re['comments'].push({user:req.query.user,value:req.query.value})
+    try {
+        let re = (await book.findOne({ bookId: req.query.bookId }))
+        re['comments'].push({ user: req.query.user, value: req.query.value })
         await re.save()
-        res.json({code:1,msg:re})
-    }catch(e){
+        res.json({ code: 1, msg: re })
+    } catch (e) {
         console.log(e)
-        res.json({code:0,msg:'error: '+e})
+        res.json({ code: 0, msg: 'error: ' + e })
     }
 
-}).get('/apiTuto/getCommentCount',async(req,res)=>{
-    let re = (await book.findOne({bookId:req.query.bookId}))['comments']
-    res.json({code:1,msg:re.length})
+}).get('/apiTuto/getCommentCount', async (req, res) => {
+    let re = (await book.findOne({ bookId: req.query.bookId }))['comments']
+    res.json({ code: 1, msg: re.length })
 })
-.get('/apiTuto/admin/dashoardInfo',async(req,res)=>{
-    let y = {}
-    try{
+    .get('/apiTuto/admin/dashoardInfo', async (req, res) => {
+        let y = {}
+        try {
 
-        y['noOfBks'] = (await book.find()).length
-        y['noOfUsers'] =  (await tutoUser.find()).length
-        y['noOfAuthors'] = (await author.find()).length
-        res.json({code:1,msg:y})
-    
-    }catch(e){
-        console.log(e)
-        res.json({code:0,msg:e})
-    }
-}).get('/apiTuto/admin/list', async(req,res)=>{
-    let y = await book.find().limit(10)
-    let yw = await author.find().limit(10)
+            y['noOfBks'] = (await book.find()).length
+            y['noOfUsers'] = (await tutoUser.find()).length
+            y['noOfAuthors'] = (await author.find()).length
+            res.json({ code: 1, msg: y })
 
-    res.json({code:1,msg:{bk:y,atr:yw}})
+        } catch (e) {
+            console.log(e)
+            res.json({ code: 0, msg: e })
+        }
+    }).get('/apiTuto/admin/list', async (req, res) => {
+        let y = await book.find().limit(10)
+        let yw = await author.find().limit(10)
+
+        res.json({ code: 1, msg: { bk: y, atr: yw } })
     })
 
-mstr.post('/apiTuto/admin/addAuthor',async(req,res)=>{
+mstr.post('/apiTuto/admin/addAuthor', async (req, res) => {
     console.log(req.body)
     let y = new author()
     y['name'] = req.body.name
     y['about'] = req.body.about
     y['photo'] = req.body.photo
-    y['id'] = 'tuto'+Math.floor(Math.random() * 10000000000)    
+    y['id'] = 'tuto' + Math.floor(Math.random() * 10000000000)
     y['dateCreated'] = new Date()
     y['noOfStars'] = req.body.stars
 
-    try{
+    try {
         let s = await y.save()
-        res.json({code:1,msg:"successfully added Author"})
-    }catch(e){
+        res.json({ code: 1, msg: "successfully added Author" })
+    } catch (e) {
         console.log(e)
-        res.json({code:0,msg:'error: '+e})
+        res.json({ code: 0, msg: 'error: ' + e })
     }
 })
-mstr.post('/apiTuto/admin/uploadBook',async(req,res)=>{
+mstr.post('/apiTuto/admin/uploadBook', async (req, res) => {
     console.log(req.body)
     let y = new book()
     y['bookArt'] = req.body.bookCova
@@ -1228,35 +1309,35 @@ mstr.post('/apiTuto/admin/uploadBook',async(req,res)=>{
     y['dateCreated'] = new Date()
     y['bookArtSm'] = req.body.bookCovaSm
 
-    try{
+    try {
         let s = await y.save()
-        res.json({code:1,msg:"successfully uploaded book"})
-    }catch(e){
+        res.json({ code: 1, msg: "successfully uploaded book" })
+    } catch (e) {
         console.log(e)
-        res.json({code:0,msg:'error: '+e})
+        res.json({ code: 0, msg: 'error: ' + e })
     }
-}).post('/apiTuto/admin/addChapter', async(req,res)=>{
-    let y = await book.findOne({bookId:req.body.id})
-    y['chapters'].push({'chapter':req.body.chp})
+}).post('/apiTuto/admin/addChapter', async (req, res) => {
+    let y = await book.findOne({ bookId: req.body.id })
+    y['chapters'].push({ 'chapter': req.body.chp })
     y.save()
-    res.json({code:1,msg:'successfully added chapter'})
+    res.json({ code: 1, msg: 'successfully added chapter' })
 })
 
 mstr.post('/nataReg', async (req, res) => {
-   try{
-   let y =  await nataSch.registerNata(req.body)
-    res.json({code:1,msg:y})
+    try {
+        let y = await nataSch.registerNata(req.body)
+        res.json({ code: 1, msg: y })
 
-   }catch(e){
-    res.json({code:0,msg:e})
+    } catch (e) {
+        res.json({ code: 0, msg: e })
 
-   }
+    }
 }).post('/nataUploadFunds', async (req, res) => {
-    try{
-       res.json({code:1,msg:await nataSch.uploadFunds(req.body.id,req.body.amt)})
-    } catch(e){
-        res.json({code:0,msg:e})
-    }   
+    try {
+        res.json({ code: 1, msg: await nataSch.uploadFunds(req.body.id, req.body.amt) })
+    } catch (e) {
+        res.json({ code: 0, msg: e })
+    }
 })
 mstr.get('/nataNameQry', async (req, res) => {
     console.log(req.query)
@@ -1264,12 +1345,12 @@ mstr.get('/nataNameQry', async (req, res) => {
         res.json({ code: 0, msg: 'use the sandbox provided account number which is 0037514056' })
     } else {
         try {
-            res.json({code:1,msg: await nataSch.nameQry()})
+            res.json({ code: 1, msg: await nataSch.nameQry() })
         } catch (e) {
             res.json({ code: 0, msg: e })
         }
     }
-}).get('/getBizMoney/:id',async(req,res)=>{
+}).get('/getBizMoney/:id', async (req, res) => {
     res.json(await nataSch.getBizMon(req.params.id))
 })
 module.exports = mstr;

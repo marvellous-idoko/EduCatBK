@@ -8,7 +8,7 @@ const book = mongoose.Schema({
     author:String,
     aboutAuthor:String,
     aboutBook:String,
-    noOfStars:String,
+    noOfStars:Number,
     noOfReads:Number,
     bookId:String,
     bookArt:String,
