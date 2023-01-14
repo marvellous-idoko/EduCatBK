@@ -20,14 +20,16 @@ const user = mongoose.Schema({
         required: true
     },
     genres:[],
-    listOfPurchasedBooks:Array(),
-    listOfBooksReadingByCoins:Array(),
+    listOfPurchasedBooks:[],
+    listOfBooksReadingByCoins:[],
     actCode:Number,
     actCodeUsed:Boolean,
     hash:String,
     salt:String,
     contact:String,
-    favAut:String
+    favAut:[],
+    trxHis:[],
+    
 })
 
 user.methods.setPassword = function (password) {

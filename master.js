@@ -1000,7 +1000,7 @@ mstr.post('/apiTuto/auth/register', async (req, res) => {
             let emailWrap = {
                 from: 'reportkad@outlook.com',
                 to: y['email'],
-                subject: 'Tuto Free Book App: Confirm Email <no reply>',
+                subject: 'Toyo Free Book App: Confirm Email <no reply>',
                 html: msg
             };
             mailer.mailFree(emailWrap)
@@ -1147,14 +1147,22 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
         let hldr = {}
         let mstRtd = []
         // console.log(u)
-        // console.log(req.query)
 
         if (req.query.cat == 'bksforyou') {
             try {
                 for (let index = 0; index < u['genres'].length; index++) {
                     for (let indexx = 0; indexx < bks.length; indexx++) {
                         if (bks[indexx]['genres'].includes(u['genres'][index])) {
-                            re.push(bks[indexx])
+                            if (req.query.further == 'true') {
+                                re.push(bks[indexx])
+                            } else {
+                                if (re.length > 4) {
+                                    indexx = bks.length
+                                    index = u['genres'].length
+                                    break;
+                                }
+                                re.push(bks[indexx])
+                            }
                         }
                     }
                 }
@@ -1166,44 +1174,118 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
         }
         else if (req.query.cat == 'genres') {
             try {
-                
                 for (let indexx = 0; indexx < bks.length; indexx++) {
-                    if (bks[indexx]['genres'].includes(req.query.genre)) {
+                    if (bks[indexx]['genres'].includes(req.query.genres)) {
+
                         re.push(bks[indexx])
                     }
-    
+
                 }
             } catch (error) {
-                console.log("err"+error)
+                console.log("err" + error)
+            }
+        }
+        else if (req.query.cat == 'trending') {
+            try {
+                console.log(trendArrF)
+                console.log(trendArr)
+                if (req.query.further == 'true') {
+
+                    for (let i = 0; i < 20; i++) {
+                        // get the id of book from the trends array; find the book and posh into books array 
+                        re.push(await book.findOne({ bookId: (Object.values(trendArrF[i]))[0] }))
+                    }
+                }
+                else {
+                    for (let i = 0; i < 5; i++) {
+                        // get the id of book from the trends array; find the book and posh into books array 
+                        re.push(await book.findOne({ bookId: (Object.values(trendArrF[i]))[0] }))
+                    }
+                }
+            } catch (e) {
+                console.log('error: ' + e)
+            }
+        }
+        else if (req.query.cat == 'crtReadng') {
+            for (let lm = 0; lm < u['listOfBooksReadingByCoins'].length; lm++) {
+                console.log(u['listOfBooksReadingByCoins'][lm])
+                re.push(await book.findOne({ bookId: u['listOfBooksReadingByCoins'][lm] }))
+            }
+        }
+        else if (req.query.cat == 'favAut') {
+            let d = []
+            if (req.query.further == 'true') {
+
+                for (let opa = 0; opa < u['favAut'].length; opa++) {
+                    d = (await book.find({ author: u['favAut'][opa] }))
+                    for (let index = 0; index < d.length; index++) {
+                        re.push(d[index]);
+                    }
+                }
+            } else {
+                for (let opa = 0; opa < u['favAut'].length; opa++) {
+                    d = (await book.find({ author: u['favAut'][opa] }))
+                    for (let index = 0; index < d.length; index++) {
+                        re.push(d[index]);
+                    }
+                }
             }
         }
 
         else if (req.query.cat == 'popular') {
             for (let indexx = 0; indexx < bks.length; indexx++) {
-                nor.push(bks['noOfReads'])
+                nor.push(bks[indexx]['noOfReads'])
             }
-            nor.sort(function (a, b) { return a - b })
-            for (let index = 0; index < 5; index++) {
-                re.push(await book.findOne({ noOfReads: nor[index] }))
+            nor.sort(function (a, b) { return b - a})            
+            if (req.query.further == 'true') {
+                for (let index = 0; nor.length; index++) {
+                    re.push(await book.findOne({ noOfReads: nor[index] }))
+                }
+            } else {
+                for (let index = 0; index < 5; index++) {
+                    re.push(await book.findOne({ noOfReads: nor[index] }))
+                }
             }
         }
         else if (req.query.cat = 'mostRated') {
+            // get star value for each book and place them in any array 
             for (let indexx = 0; indexx < bks.length; indexx++) {
                 mstRtd.push(bks[indexx]['noOfStars'])
-            // console.log(await bks[indexx]['noOfStars'])
             }
+            // sort the array
             mstRtd.sort(function (a, b) { return b - a })
-            for (let index = 0; index < 5; index++) {
-                // mstRtd[index]
-                console.log(mstRtd[index])
-                // console.log(await book.findOne({ noOfStars:mstRtd[index] }))
-                re.push(await book.findOne({ noOfStars: mstRtd[index] }))
+            // get all the books using the ranking of their star
+            if (req.query.further == 'true') {
+                for (let index = 0; index < mstRtd.length; index++) {
+                    re.push(await book.findOne({ noOfStars: mstRtd[index] }))
+                }
+            } else {
+                for (let index = 0; index < 5; index++) {
+                    re.push(await book.findOne({ noOfStars: mstRtd[index] }))
+                }
+
             }
         }
-
-
-        res.json(await re)
+        res.json(re)
+    }).get("/apiTuto/postCoin", async (req, res) => {
+        let t = await tutoUser.findOne({account_no:req.query.user});
+        t.coins = parseInt(t.coins) + parseInt(req.query.amt);
+        await t.save()
+        t.salt = ''
+        t.hash = ''
+        res.json({code:1,msg:'Congrats you have successfully purchased '+req.query.amt+" coins",u:t})
+    }).get("/apiTuto/removeCoin", async (req, res) => {
+        let t = tutoUser.findOne({account_no:req.query.user})
+        if(parseInt(t.coins) - parseInt(req.query.amt) < 0){
+        res.json({code:0,msg:" coins insuffucient"})
+        }else{
+            t.coins = parseInt(t.coins) - parseInt(req.query.amt) 
+            t.save()
+        }
+        res.json({code:1})
+        
     })
+
 function arrayMin(arr) {
     var len = arr.length, min = Infinity;
     while (len--) {
@@ -1295,6 +1377,7 @@ mstr.post('/apiTuto/admin/uploadBook', async (req, res) => {
     y['content'] = req.body.table
     y['ack'] = req.body.ack
     y['noOfStars'] = req.body.stars
+    y['noOfReads'] = 0
     y['chapters'] = [
         // {chapter1:req.body.chapter1},
         // {chapter2:req.body.chapter2},
@@ -1322,6 +1405,76 @@ mstr.post('/apiTuto/admin/uploadBook', async (req, res) => {
     y.save()
     res.json({ code: 1, msg: 'successfully added chapter' })
 })
+mstr.get('/apiTuto/increNoReads', async (req, res) => {
+    try {
+        let y = await book.findOne({ bookId: req.query.bookId })
+        let u = await tutoUser.findOne({ account_no: req.query.user })
+        if (!u['favAut'].includes(y['author'])) {
+            u['favAut'].push(y['author'])
+        }
+        if (!u['listOfBooksReadingByCoins'].includes(req.query.bookId)) {
+            u['listOfBooksReadingByCoins'].push(req.query.bookId)
+        }
+        u.save()
+        y['noOfReads'] = parseInt(y['noOfReads']) + 1
+        y.save()
+        res.json({ code: 1 })
+        trnd()
+    } catch (e) {
+        console.log('err: ' + e)
+    }
+
+})
+let trendArr = []
+let trendArrF = []
+let arrTre = []
+
+async function trnd() {
+    let bks = await book.find()
+    let usrs = await tutoUser.find()
+    let bksArr = []
+    let usrsArr = []
+    for (let index = 0; index < bks.length; index++) {
+        bksArr.push(bks[index]['bookId']);
+    }
+    for (let indexx = 0; indexx < usrs.length; indexx++) {
+        usrsArr.push(usrs[indexx]['listOfBooksReadingByCoins']);
+    }
+
+    let bkFrq = 0
+    let j = ''
+    let yp = []
+    for (let indxx = 0; indxx < usrs.length; indxx++) {
+        // loop over the array of users currently read books
+        for (let indx = 0; indx < usrsArr.length; indx++) {
+            if (usrsArr[indx].includes(bksArr[indxx])) {
+                bkFrq++
+                console.log(usrsArr[indx])
+            }
+        }
+
+        j = bksArr[indxx]
+        yp.push(bkFrq)
+        trendArr.push({ bkFrq: j })
+    }
+    console.log(yp)
+    // ranktrnd()
+}
+// trnd()
+let ranktrnd = () => {
+    let arr = []
+    for (let index = 0; index < trendArr.length; index++) {
+        arr.push((Object.keys(trendArr[index]))[0])
+    }
+    let arrTree = arr.sort(function (a, b) { return parseInt(a) - parseInt(b) })
+    for (let inde = 0; inde < arrTree.length; inde++) {
+        for (let ing = 0; ing < trendArr.length; ing++) {
+            if (arrTree[inde].toString() in trendArr[ing]) {
+                trendArrF.push(trendArr[ing])
+            }
+        }
+    }
+}
 
 mstr.post('/nataReg', async (req, res) => {
     try {
