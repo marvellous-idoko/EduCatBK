@@ -1150,6 +1150,7 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
 
         if (req.query.cat == 'bksforyou') {
             try {
+                // console.log(u)
                 for (let index = 0; index < u['genres'].length; index++) {
                     for (let indexx = 0; indexx < bks.length; indexx++) {
                         if (bks[indexx]['genres'].includes(u['genres'][index])) {
@@ -1187,19 +1188,19 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
         }
         else if (req.query.cat == 'trending') {
             try {
-                console.log(trendArrF)
-                console.log(trendArr)
                 if (req.query.further == 'true') {
 
                     for (let i = 0; i < 20; i++) {
                         // get the id of book from the trends array; find the book and posh into books array 
-                        re.push(await book.findOne({ bookId: (Object.values(trendArrF[i]))[0] }))
+                        // re.push(await book.findOne({ bookId: (Object.values(trendArrF[i]))[0] }))
+                        re.push(trendArrF[i])
                     }
                 }
                 else {
                     for (let i = 0; i < 5; i++) {
-                        // get the id of book from the trends array; find the book and posh into books array 
-                        re.push(await book.findOne({ bookId: (Object.values(trendArrF[i]))[0] }))
+                        re.push(trendArrF[i])
+                       
+                        // re.push(await book.findOne({ bookId: (Object.values(trendArrF[i]))[0] }))
                     }
                 }
             } catch (e) {
@@ -1233,6 +1234,7 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
         }
 
         else if (req.query.cat == 'popular') {
+            // based on noOfReads
             for (let indexx = 0; indexx < bks.length; indexx++) {
                 nor.push(bks[indexx]['noOfReads'])
             }
@@ -1257,10 +1259,13 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
             // get all the books using the ranking of their star
             if (req.query.further == 'true') {
                 for (let index = 0; index < mstRtd.length; index++) {
+                    console.log(mstRtd + 'further , , ,')
+                    
                     re.push(await book.findOne({ noOfStars: mstRtd[index] }))
                 }
             } else {
                 for (let index = 0; index < 5; index++) {
+                    console.log(mstRtd)
                     re.push(await book.findOne({ noOfStars: mstRtd[index] }))
                 }
 
@@ -1438,29 +1443,53 @@ async function trnd() {
         bksArr.push(bks[index]['bookId']);
     }
     for (let indexx = 0; indexx < usrs.length; indexx++) {
-        usrsArr.push(usrs[indexx]['listOfBooksReadingByCoins']);
+        if(usrs[indexx]['listOfBooksReadingByCoins'].length > 0){
+            usrsArr.push(usrs[indexx]['listOfBooksReadingByCoins']);
+        }
     }
-
     let bkFrq = 0
     let j = ''
     let yp = []
-    for (let indxx = 0; indxx < usrs.length; indxx++) {
+    let p = {}
+    for (let indxx = 0; indxx < bksArr.length; indxx++) {
         // loop over the array of users currently read books
         for (let indx = 0; indx < usrsArr.length; indx++) {
             if (usrsArr[indx].includes(bksArr[indxx])) {
                 bkFrq++
-                console.log(usrsArr[indx])
             }
-        }
-
-        j = bksArr[indxx]
-        yp.push(bkFrq)
-        trendArr.push({ bkFrq: j })
+            }
+            
+            // console.log(bkFrq + "mlml")
+            // console.log(usrsArr[indx])
+            // j = bksArr[indxx]
+            // console.log(j)
+            
+           p[bkFrq]=bksArr[indxx]
+            // console.log(bksArr[indxx])
+            // console.log(p)   
+            yp.push(bkFrq)
+            trendArr.push(p)
+            bkFrq = 0
+            p = {}
     }
-    console.log(yp)
+    // console.log(trendArr)
+    // console.log(yp)
+    // Rank Here
+    let arrTree = yp.sort(function (a, b) { return parseInt(b) - parseInt(a) })
+   
+    for(let jd = 0; jd < arrTree.length;jd++ ){
+        for (let il = 0; il < trendArr.length; il++) {
+            // const element = trendArr[il];
+            if(arrTree[jd] in trendArr[il]){
+                trendArrF.push(await book.findOne({bookId:trendArr[il][arrTree[jd]]}))
+            }
+            
+        }
+    }
+    // console.log(arrTree)
     // ranktrnd()
 }
-// trnd()
+trnd()
 let ranktrnd = () => {
     let arr = []
     for (let index = 0; index < trendArr.length; index++) {
