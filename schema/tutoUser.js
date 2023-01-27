@@ -29,6 +29,7 @@ const user = mongoose.Schema({
     contact:String,
     favAut:[],
     trxHis:[],
+    clt:String
     
 })
 

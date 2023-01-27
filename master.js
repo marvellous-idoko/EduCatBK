@@ -1413,12 +1413,13 @@ mstr.post('/apiTuto/admin/uploadBook', async (req, res) => {
 mstr.get('/apiTuto/increNoReads', async (req, res) => {
     try {
         let y = await book.findOne({ bookId: req.query.bookId })
-        let u = await tutoUser.findOne({ account_no: req.query.user })
+        let id = req.query.bookId
+                let u = await tutoUser.findOne({ account_no: req.query.user })
         if (!u['favAut'].includes(y['author'])) {
             u['favAut'].push(y['author'])
         }
         if (!u['listOfBooksReadingByCoins'].includes(req.query.bookId)) {
-            u['listOfBooksReadingByCoins'].push(req.query.bookId)
+            u['listOfBooksReadingByCoins'].push(id)
         }
         u.save()
         y['noOfReads'] = parseInt(y['noOfReads']) + 1
@@ -1429,7 +1430,91 @@ mstr.get('/apiTuto/increNoReads', async (req, res) => {
         console.log('err: ' + e)
     }
 
+}).get('/apiTuto/increBookAcq',async(req,res)=>{
+    // find user
+    let u = await tutoUser.findOne({account_no:req.query.user})
+    // loop over user's 'listOfBooksReadingByCoins'
+    for (let index = 0; index < u['clt'].length; index++) {
+        // check for bookId in each element of arr of type object 
+        if(req.query.bookId in u['clt'][index]){
+            // increase count by one
+            u['clt'][index][req.query.bookId] = parseInt(u['clt'][index][req.query.bookId]) + 1
+        }        
+    }  
+    u.save()
+    res.send({code:1})
+    
+}).get('/apiTuto/chkBkCrnRead',async(req,res)=>{
+    let u = await tutoUser.findOne({account_no:req.query.user})
+    let yi = JSON.parse(u['clt'])
+    if(u['clt'] == null || undefined){
+
+         res.json({code:1})
+     }
+            else if(req.query.bookId in yi){
+                // increase count by one
+            res.json({code:1,msg:'avail',kile:yi[req.query.bookId]})
+            }else{
+                res.json({code:1})
+
+        }
+    
+}).get('/apiTuto/rmvCoin',async(req,res)=>{
+    let bk = await book.findOne({bookId:req.query.bookId})
+    let u = await tutoUser.findOne({account_no:req.query.user})
+    let yi = {}
+    // console.log(parseInt(u.coins) > parseInt(bk.price))
+    if(parseInt(u.coins) > parseInt(bk.price)){
+        u.coins = parseInt(u.coins) - parseInt(bk.price)
+        // check for bookId in each element of arr of type object 
+        if(u['clt'] == null || undefined){
+            u['clt']= JSON.stringify ({[req.query.bookId]:2})
+            console.log(u['clt'])
+
+        }
+        else {
+
+            yi = JSON.parse(u['clt'])
+        
+            if (req.query.bookId in yi) {
+                // increase count by one
+                if (parseInt(req.query.chptr) > parseInt(yi[req.query.bookId])) {
+                    yi[req.query.bookId] = parseInt(yi[req.query.bookId]) + 1
+                }
+
+            } else {
+                console.log(parseInt(req.query.chptr))
+
+                yi[req.query.bookId] = 2
+            }
+            u['clt'] = JSON.stringify(yi)
+        }
+
+           let yu = await u.save()
+            
+            console.log(yu['clt'])
+        yu.hash = ''
+        yu.salt = ''
+        res.send({code:1,msg:'done',user:yu})
+        }
+    else{
+        res.json({code:1,msg:'insufficient'})
+    }
+
+
+}).get('/apiTuto/search',async(req,res)=>{
+    try{
+
+        res.json({code:1,msg: await book.find({title:req.query.item})})
+    }
+    catch(e){
+        res.json({code:0,msg:'err: '+e})
+    }
 })
+
+
+
+
 let trendArr = []
 let trendArrF = []
 let arrTre = []
