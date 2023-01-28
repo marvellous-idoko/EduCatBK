@@ -14,10 +14,6 @@ var mongoose = require("mongoose");
 const master = require('./master')
 const school = require('./school')
 
-// app.use(cors());
-// app.options('*', cors())
-
-
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 let URL = 'mongodb+srv://CaptJackSparrow:GcLNtd0BR6xiW11b@educatcluster0.xr1hmp5.mongodb.net/?retryWrites=true&w=majority'
