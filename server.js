@@ -23,7 +23,6 @@ mongoose.connect(URL,{useNewUrlParser: true, useUnifiedTopology: true })
 mongoose.connection.on('connected', ()=>{
     console.log("connected to DB");
 });
-// GcLNtd0BR6xiW11b
 mongoose.connection.on('error',(err)=>{
     if(err)console.log("error in DB connection"+err);
     console.log("connected")
