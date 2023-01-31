@@ -26,7 +26,7 @@ const mailer = require('./mailer')
 mstr.use(fileUpload({ debug: false }))
 mstr.use(express.json());
 mstr.use(express.urlencoded({ extended: true }));
-
+const trxHis = require('./schema/trxns')
 const tutoUser = require('./schema/tutoUser')
 const book = require('./schema/book');
 const author = require("./schema/author");
@@ -721,7 +721,6 @@ mstr.get(teacherApi + "getStudents/:id/:schId/:class", async (req, res) => {
     let lTeacher = await teacher.findOne({ teacherID: req.params.id })
     res.json(lTeacher)
 }).get(teacherApi + 'getTchrSubject/:id/:schId', async (req, res) => {
-    console.log(req.params)
     let io = await teacher.findOne({ teacherID: req.params.id, schId: req.params.schId }); res.json(io['subject'])
 })
 mstr.get(teacherApi + "getMoreStudents/:id", async (req, res) => {
@@ -1279,6 +1278,13 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
         t.salt = ''
         t.hash = ''
         res.json({code:1,msg:'Congrats you have successfully purchased '+req.query.amt+" coins",u:t})
+        let trv = new trxHis()
+        trv.id = req.query.ref
+        trv.userId = req.query.user
+        trv.coins = req.query.amt
+        trv.amount = req.query.amtCsh
+        trv.date = new Date()
+        trv.save()
     }).get("/apiTuto/removeCoin", async (req, res) => {
         let t = tutoUser.findOne({account_no:req.query.user})
         if(parseInt(t.coins) - parseInt(req.query.amt) < 0){
@@ -1510,15 +1516,30 @@ mstr.get('/apiTuto/increNoReads', async (req, res) => {
     catch(e){
         res.json({code:0,msg:'err: '+e})
     }
+}).get('/apiTuto/trxHis',async(req,res)=>{
+    try{
+        if(req.query.admin){
+            res.json({code:1,msg: await trxHis.find()})
+        }else{
+            res.json({code:1,msg: await trxHis.find({userId:req.query.user})})
+        }
+    }catch(e){
+        res.json({code:0,msg:'error: '+e})
+        
+    }
+}).get('/apiTuto/admin/cmpltBk',async(req,res)=>{
+    let bk = await book.findOne({bookId:req.query.bookId})
+    bk['done'] = true
+    bk.save()
+    res.json({code:1,msg:'successfully ended'})
+}).delete('/apiTuto/admin/delBk',async(req,res)=>{
+    let kj = await book.deleteOne({bookId:req.query.bookId})
+    console.log(kj)
+    res.json({code:1,msg:'deleted'})
 })
-
-
-
-
 let trendArr = []
 let trendArrF = []
 let arrTre = []
-
 async function trnd() {
     let bks = await book.find()
     let usrs = await tutoUser.find()

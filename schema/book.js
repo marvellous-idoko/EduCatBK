@@ -20,7 +20,7 @@ const book = mongoose.Schema({
     preface:String,
     content:String,
     ack:String,
-    
+    done:false
 
 })
 module.exports = mongoose.model('book', book);
