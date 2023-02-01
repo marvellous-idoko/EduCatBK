@@ -1210,9 +1210,7 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
             if(u['listOfBooksReadingByCoins'] == null || undefined){
                 res.json({code:1,msg:'none'})
             }else{
-
                 for (let lm = 0; lm < u['listOfBooksReadingByCoins'].length; lm++) {
-                    console.log(u['listOfBooksReadingByCoins'][lm])
                     re.push(await book.findOne({ bookId: u['listOfBooksReadingByCoins'][lm] }))
                 }
             }
