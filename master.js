@@ -1207,7 +1207,7 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
             }
         }
         else if (req.query.cat == 'crtReadng') {
-            if(u['listOfBooksReadingByCoins'].length == 0){
+            if(u['listOfBooksReadingByCoins'] == null || undefined){
                 res.json({code:1,msg:'none'})
             }else{
 
