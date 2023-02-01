@@ -1207,9 +1207,14 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
             }
         }
         else if (req.query.cat == 'crtReadng') {
-            for (let lm = 0; lm < u['listOfBooksReadingByCoins'].length; lm++) {
-                console.log(u['listOfBooksReadingByCoins'][lm])
-                re.push(await book.findOne({ bookId: u['listOfBooksReadingByCoins'][lm] }))
+            if(u['listOfBooksReadingByCoins'].length == 0){
+                res.json({code:1,msg:'none'})
+            }else{
+
+                for (let lm = 0; lm < u['listOfBooksReadingByCoins'].length; lm++) {
+                    console.log(u['listOfBooksReadingByCoins'][lm])
+                    re.push(await book.findOne({ bookId: u['listOfBooksReadingByCoins'][lm] }))
+                }
             }
         }
         else if (req.query.cat == 'favAut') {
