@@ -1143,6 +1143,8 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
         let re = []
         let nor = []
         let mstRtd = []
+       try{
+        
         if (req.query.cat == 'bksforyou') {
             try {
                 // console.log(u)
@@ -1222,10 +1224,14 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
                     }
                 }
             } else {
-                for (let opa = 0; opa < u['favAut'].length; opa++) {
-                    d = (await book.find({ author: u['favAut'][opa] }))
-                    for (let index = 0; index < d.length; index++) {
-                        re.push(d[index]);
+                if(u['favAut'] == null || undefined){
+                    res.json({code:1,msg:'none'})
+                }else{
+                    for (let opa = 0; opa < u['favAut'].length; opa++) {
+                        d = (await book.find({ author: u['favAut'][opa] }))
+                        for (let index = 0; index < d.length; index++) {
+                            re.push(d[index]);
+                        }
                     }
                 }
             }
@@ -1270,6 +1276,9 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
             }
         }
         res.json(re)
+    }catch(e){
+        res.json({code:0,msg:'err: '+e})
+    }
     }).get("/apiTuto/postCoin", async (req, res) => {
         let t = await tutoUser.findOne({account_no:req.query.user});
         t.coins = parseInt(t.coins) + parseInt(req.query.amt);
@@ -1320,7 +1329,6 @@ mstr.get('/apiTuto/getComments', async (req, res) => {
     res.json({ code: 1, msg: re })
 
 }).get('/apiTuto/comment', async (req, res) => {
-    console.log(req.query)
     try {
         let re = (await book.findOne({ bookId: req.query.bookId }))
         re['comments'].push({ user: req.query.user, value: req.query.value })
