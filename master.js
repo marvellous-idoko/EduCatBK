@@ -1142,11 +1142,7 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
         let bks = await book.find()
         let re = []
         let nor = []
-        let max = 0
-        let hldr = {}
         let mstRtd = []
-        // console.log(u)
-
         if (req.query.cat == 'bksforyou') {
             try {
                 // console.log(u)
