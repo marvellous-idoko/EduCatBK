@@ -1357,8 +1357,8 @@ mstr.get('/apiTuto/getComments', async (req, res) => {
             res.json({ code: 0, msg: e })
         }
     }).get('/apiTuto/admin/list', async (req, res) => {
-        let y = await book.find().limit(10)
-        let yw = await author.find().limit(10)
+        let y = await book.find().sort({$natural: -1 }).limit(15)
+        let yw = await author.find().sort({$natural: -1 }).limit(15)
 
         res.json({ code: 1, msg: { bk: y, atr: yw } })
     })
@@ -1459,18 +1459,23 @@ mstr.get('/apiTuto/increNoReads', async (req, res) => {
     
 }).get('/apiTuto/chkBkCrnRead',async(req,res)=>{
     let u = await tutoUser.findOne({account_no:req.query.user})
-    let yi = JSON.parse(u['clt'])
-    if(u['clt'] == null || undefined){
+   if(u['clt'] == null || undefined){
+       
+       res.json({code:1})
+    }
+    else {
+                let yi = JSON.parse(u['clt'])
 
-         res.json({code:1})
-     }
-            else if(req.query.bookId in yi){
-                // increase count by one
-            res.json({code:1,msg:'avail',kile:yi[req.query.bookId]})
-            }else{
-                res.json({code:1})
-
-        }
+                
+                if(req.query.bookId in yi){
+                    // increase count by one
+                res.json({code:1,msg:'avail',kile:yi[req.query.bookId]})
+                }else{
+                    res.json({code:1})
+    
+            }
+            
+            }
     
 }).get('/apiTuto/rmvCoin',async(req,res)=>{
     let bk = await book.findOne({bookId:req.query.bookId})
