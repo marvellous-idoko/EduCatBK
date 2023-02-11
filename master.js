@@ -579,7 +579,7 @@ function pwdHasher(pwd) {
 }
 
 mstr.get(rslt + 'getRslt', async (req, res) => {
-    if (await pin.checkPinUsage(req.query.pin, req.query.term, req.query.session, req.query.id) == true) {
+    if (await pin.checkPinUsage(req.query.pin, req.query.term, req.query.session, req.query.id)) {
         res.json({ code: 0, msg: 'pin incorrect or already exceeded validity' })
     } else {
         res.json(await result.getResult(req.query.term, req.query.id, req.query.session))
@@ -712,7 +712,7 @@ mstr.post(teacherApi + 'enterResults/', async (req, res) => {
 })
 mstr.get(teacherApi + "getStudents/:id/:schId/:class", async (req, res) => {
     try {
-        let lStudents = await Student.find({ subclass: req.params.id, schId: req.params.schId, class: req.params.class })
+        let lStudents = await Student.find({ subclass: req.params.id, schId: req.params.schId })
         res.json({ code: 1, data: lStudents })
     } catch (e) {
         res.json({ code: 0, msg: e })
@@ -721,16 +721,17 @@ mstr.get(teacherApi + "getStudents/:id/:schId/:class", async (req, res) => {
     let lTeacher = await teacher.findOne({ teacherID: req.params.id })
     res.json(lTeacher)
 }).get(teacherApi + 'getTchrSubject/:id/:schId', async (req, res) => {
-    let io = await teacher.findOne({ teacherID: req.params.id, schId: req.params.schId }); res.json(io['subject'])
+    let io = await teacher.findOne({ teacherID: req.params.id, schId: req.params.schId }); 
+    res.json(io['subject'])
 })
 mstr.get(teacherApi + "getMoreStudents/:id", async (req, res) => {
     let lTeacher = await teacher.findOne({ teacherID: req.params.id })
     let lStudents = await Student.find({ subclass: lTeacher.subject })
 })
 mstr.post(teacherApi + "checkResults", async (req, res) => {
-    // console.log(req.body)
-    let array = await Student.find({ class: req.body.class, subclass: req.body.subclass, schId: req.body.schId })
-    let arr = await result.checkResultBeforeSubmit({ class: req.body.class, subclass: req.body.subclass, schId: req.body.schId, session: req.body.session, subject: req.body.subject, term: req.body.term })
+    let array = await Student.find({ subclass: req.body.subclass, schId: req.body.schId })
+  
+    let arr = await result.checkResultBeforeSubmit({ subclass: req.body.subclass, schId: req.body.schId, session: req.body.session, subject: req.body.subject, term: req.body.term })
     if (arr.length == 0) {
         res.json(arr)
     }

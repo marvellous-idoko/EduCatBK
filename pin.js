@@ -11,8 +11,7 @@ module.exports = {
          if (pinn.term == term) {     
             if (pinn.session == session) {
                console.log(pinn.id, id)
-               if (pinn.id == id) {
-                  console.log('bbjbj')
+               // if (pinn.id == id) {
                   if (pinn.noOfTimes == pinn.noOfTimesUsed) {
                      pinn.used = false
                      pinn.save()
@@ -23,9 +22,9 @@ module.exports = {
                      pinn.save()
                      return false
                   }
-               } else {
-                  return true
-               }
+               // } else {
+               //    return true
+               // }
                // pinn.noOfTimesUsed = (pinn.noOfTimesUsed + 1)
                // pinn.save()
                // return false
