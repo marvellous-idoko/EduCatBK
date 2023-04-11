@@ -728,7 +728,7 @@ mstr.get(teacherApi + "getMoreStudents/:id", async (req, res) => {
     let lTeacher = await teacher.findOne({ teacherID: req.params.id })
     let lStudents = await Student.find({ subclass: lTeacher.subject })
 })
-mstr.post(teacherApi + "checkResults", async (req, res) => {
+mstr.post(teacherApi + "checkResults", async (req, res) => {;
     let array = await Student.find({ subclass: req.body.subclass, schId: req.body.schId })
   
     let arr = await result.checkResultBeforeSubmit({ subclass: req.body.subclass, schId: req.body.schId, session: req.body.session, subject: req.body.subject, term: req.body.term })
@@ -1032,7 +1032,7 @@ mstr.get('/apiTuto/getBookRead', async (req, res) => {
         res.json({ code: 0, msg: e })
     }
 })
-    .post('/apiTuto/commentAboutBook', async (req, res) => {
+.post('/apiTuto/commentAboutBook', async (req, res) => {
         try {
             let bk = book.findOne({ id: req.query.bookId })
             let cmts = bk.comments
@@ -1228,6 +1228,7 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
                 if(u['favAut'] == null || undefined){
                     res.json({code:1,msg:'none'})
                 }else{
+                    console.log(u['favAut'])
                     for (let opa = 0; opa < u['favAut'].length; opa++) {
                         d = (await book.find({ author: u['favAut'][opa] }))
                         for (let index = 0; index < d.length; index++) {
@@ -1264,13 +1265,12 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
             // get all the books using the ranking of their star
             if (req.query.further == 'true') {
                 for (let index = 0; index < mstRtd.length; index++) {
-                    console.log(mstRtd + 'further , , ,')
+                    // console.log(mstRtd + 'further , , ,')
                     
                     re.push(await book.findOne({ noOfStars: mstRtd[index] }))
                 }
             } else {
                 for (let index = 0; index < 5; index++) {
-                    console.log(mstRtd)
                     re.push(await book.findOne({ noOfStars: mstRtd[index] }))
                 }
 

@@ -16,8 +16,8 @@ const school = require('./school')
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-let URL = 'mongodb+srv://CaptJackSparrow:GcLNtd0BR6xiW11b@educatcluster0.xr1hmp5.mongodb.net/?retryWrites=true&w=majority'
-// let URL = 'mongodb://localhost:27017/'
+// let URL = 'mongodb+srv://CaptJackSparrow:GcLNtd0BR6xiW11b@educatcluster0.xr1hmp5.mongodb.net/?retryWrites=true&w=majority'
+let URL = 'mongodb://localhost:27017/'
 
 mongoose.connect(URL,{useNewUrlParser: true, useUnifiedTopology: true })
 mongoose.connection.on('connected', ()=>{

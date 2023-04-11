@@ -30,7 +30,7 @@ const transporter = nodemailer.createTransport({
     user: "reportkad@outlook.com",
     pass: "Report2022"
   }
-});
+})
 
 // user: "aptmachjo@outlook.com",
 // pass: "ALs)JDV$h/M2^WV"
