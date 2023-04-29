@@ -21,8 +21,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "build": "netlify-lambda build express"
-  },
+    "build": "node server.js"
+    },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/marvellous-idoko/EduCatBK.git"
