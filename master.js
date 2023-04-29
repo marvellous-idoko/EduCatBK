@@ -30,6 +30,7 @@ const trxHis = require('./schema/trxns')
 const tutoUser = require('./schema/tutoUser')
 const book = require('./schema/book');
 const author = require("./schema/author");
+const trxns = require("./schema/trxns");
 // mstr.get('*', (req, res) => {
 //     console.log(req.url)
 //    if(req.url.includes('.png')){
@@ -226,7 +227,6 @@ mstr.post(schAdmin + "addTeacher", (req, res) => {
             res.json({ code: 0, msg: "no photo found, please include student photo" })
             return;
         } else {
-
             // req.files.photo.mv(up, (err) => {
             let newStdnt = new Student()
             let hash = pwdHasher('123456')
@@ -1126,6 +1126,20 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
             res.json({ code: 0, msg: "error: " + e })
         }
 
+    }).get("/apiTuto/admin/getTotTrans", async (req, res) => {
+           let trn = await trxns.find()
+           let total = 0.0
+           for (let index = 0; index < trn.length; index++) {
+            console.log(trn[index]['amount'])
+            total = total + (parseFloat( trn[index]['amount']));
+           }
+           res.json({msg: total,code:1})
+    }).get("/apiTuto/admin/getLast20Trxn", async (req, res) => {
+        try{
+            res.json({msg:await trxns.find().sort({_id:-1}).limit(20),code:1})
+        }catch(e){
+            res.json({code:0,msg:'err: '+e})
+        }
     }).get("/apiTuto/admin/getAuthors", async (req, res) => {
         try {
             let y = await author.find()
