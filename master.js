@@ -1242,7 +1242,6 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
                 if(u['favAut'] == null || undefined){
                     res.json({code:1,msg:'none'})
                 }else{
-                    console.log(u['favAut'])
                     for (let opa = 0; opa < u['favAut'].length; opa++) {
                         d = (await book.find({ author: u['favAut'][opa] }))
                         for (let index = 0; index < d.length; index++) {
@@ -1289,6 +1288,10 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
                 }
 
             }
+        }
+        for (let index = 0; index < re.length; index++) {
+            re[index]['chapters'] = null
+            re[index]['comments'] = null
         }
         res.json(re)
     }catch(e){
