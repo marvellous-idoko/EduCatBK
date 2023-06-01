@@ -1162,7 +1162,6 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
         
         if (req.query.cat == 'bksforyou') {
             try {
-                // console.log(u)
                 for (let index = 0; index < u['genres'].length; index++) {
                     for (let indexx = 0; indexx < bks.length; indexx++) {
                         if (bks[indexx]['genres'].includes(u['genres'][index])) {
@@ -1189,7 +1188,6 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
             try {
                 for (let indexx = 0; indexx < bks.length; indexx++) {
                     if (bks[indexx]['genres'].includes(req.query.genres)) {
-
                         re.push(bks[indexx])
                     }
 
@@ -1211,9 +1209,7 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
                 else {
                     for (let i = 0; i < 5; i++) {
                         re.push(trendArrF[i])
-                       
-                        // re.push(await book.findOne({ bookId: (Object.values(trendArrF[i]))[0] }))
-                    }
+                   }
                 }
             } catch (e) {
                 console.log('error: ' + e)
@@ -1289,6 +1285,145 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
 
             }
         }
+        res.json(re)
+    }catch(e){
+        res.json({code:0,msg:'err: '+e})
+    }
+    }).
+    get("/apiTuto/listBookys", async (req, res) => {
+      console.log(req.params)
+        let u = await tutoUser.findOne({ account_no: req.query.account_no })
+        let bks = await book.find()
+        let re = []
+        let nor = []
+        let mstRtd = []
+       try{
+        if (req.query.cat == 'bksforyou') {
+            try {
+                for (let index = 0; index < u['genres'].length; index++) {
+                    for (let indexx = 0; indexx < bks.length; indexx++) {
+                        if (bks[indexx]['genres'].includes(u['genres'][index])) {
+                            if (req.query.further == 'true') {
+                                re.push(bks[indexx])
+                            } else {
+                                if (re.length > 4) {
+                                    indexx = bks.length
+                                    index = u['genres'].length
+                                    break;
+                                }
+                                re.push(bks[indexx])
+                            }
+                        }
+                    }
+                }
+            }
+
+            catch (e) {
+                console.log("error: " + e)
+            }
+        }
+        else if (req.query.cat == 'genres') {
+            try {
+                for (let indexx = 0; indexx < bks.length; indexx++) {
+                    if (bks[indexx]['genres'].includes(req.query.genres)) {
+                        re.push(bks[indexx])
+                    }
+
+                }
+            } catch (error) {
+                console.log("err" + error)
+            }
+        }
+        else if (req.query.cat == 'trending') {
+            try {
+                if (req.query.further == 'true') {
+
+                    for (let i = 0; i < 20; i++) {
+                        // get the id of book from the trends array; find the book and posh into books array 
+                        // re.push(await book.findOne({ bookId: (Object.values(trendArrF[i]))[0] }))
+                        re.push(trendArrF[i])
+                    }
+                }
+                else {
+                    for (let i = 0; i < 5; i++) {
+                        re.push(trendArrF[i])
+                   }
+                }
+            } catch (e) {
+                console.log('error: ' + e)
+            }
+        }
+        else if (req.query.cat == 'crtReadng') {
+            if(u['listOfBooksReadingByCoins'] == null || undefined){
+                res.json({code:1,msg:'none'})
+            }else{
+                for (let lm = 0; lm < u['listOfBooksReadingByCoins'].length; lm++) {
+                    re.push(await book.findOne({ bookId: u['listOfBooksReadingByCoins'][lm] }))
+                }
+            }
+        }
+        else if (req.query.cat == 'favAut') {
+            let d = []
+            if (req.query.further == 'true') {
+
+                for (let opa = 0; opa < u['favAut'].length; opa++) {
+                    d = (await book.find({ author: u['favAut'][opa] }))
+                    for (let index = 0; index < d.length; index++) {
+                        re.push(d[index]);
+                    }
+                }
+            } else {
+                if(u['favAut'] == null || undefined){
+                    res.json({code:1,msg:'none'})
+                }else{
+                    for (let opa = 0; opa < u['favAut'].length; opa++) {
+                        d = (await book.find({ author: u['favAut'][opa] }))
+                        for (let index = 0; index < d.length; index++) {
+                            re.push(d[index]);
+                        }
+                    }
+                }
+            }
+        }
+
+        else if (req.query.cat == 'popular') {
+            // based on noOfReads
+            for (let indexx = 0; indexx < bks.length; indexx++) {
+                nor.push(bks[indexx]['noOfReads'])
+            }
+            nor.sort(function (a, b) { return b - a})            
+            if (req.query.further == 'true') {
+                for (let index = 0; nor.length; index++) {
+                    re.push(await book.findOne({ noOfReads: nor[index] }))
+                }
+            } else {
+                for (let index = 0; index < 5; index++) {
+                    re.push(await book.findOne({ noOfReads: nor[index] }))
+                }
+            }
+        }
+        else if (req.query.cat = 'mostRated') {
+            // get star value for each book and place them in any array 
+            for (let indexx = 0; indexx < bks.length; indexx++) {
+                mstRtd.push(bks[indexx]['noOfStars'])
+            }
+            // sort the array
+            mstRtd.sort(function (a, b) { return b - a })
+            // get all the books using the ranking of their star
+            if (req.query.further == 'true') {
+                for (let index = 0; index < mstRtd.length; index++) {
+                    // console.log(mstRtd + 'further , , ,')
+                    
+                    re.push(await book.findOne({ noOfStars: mstRtd[index] }))
+                }
+            } else {
+                console.log(mstRtd)
+                for (let index = 0; index < 5; index++) {
+                    re.push(await book.findOne({ noOfStars: mstRtd[index] }))
+                }
+
+            }
+        }
         for (let index = 0; index < re.length; index++) {
             re[index]['chapters'] = null
             re[index]['comments'] = null
@@ -1297,7 +1432,8 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
     }catch(e){
         res.json({code:0,msg:'err: '+e})
     }
-    }).get("/apiTuto/postCoin", async (req, res) => {
+    })
+    .get("/apiTuto/postCoin", async (req, res) => {
         let t = await tutoUser.findOne({account_no:req.query.user});
         t.coins = parseInt(t.coins) + parseInt(req.query.amt);
         await t.save()
