@@ -1636,7 +1636,7 @@ mstr.get('/apiTuto/increNoReads', async (req, res) => {
     let u = await tutoUser.findOne({account_no:req.query.user})
     let yi = {}
     // console.log(parseInt(u.coins) > parseInt(bk.price))
-    if(parseInt(u.coins) > parseInt(bk.price)){
+    if(parseInt(u.coins) >= parseInt(bk.price)){
         u.coins = parseInt(u.coins) - parseInt(bk.price)
         // check for bookId in each element of arr of type object 
         if(u['clt'] == null || undefined){
