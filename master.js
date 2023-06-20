@@ -1677,7 +1677,10 @@ mstr.get('/apiTuto/increNoReads', async (req, res) => {
 }).get('/apiTuto/search',async(req,res)=>{
     try{
 
-        res.json({code:1,msg: await book.find({title: {$regex:/^(req.query.item.toLowerCase())/i}})})
+        res.json({code:1,msg: await book.find({title: {$regex:/^req.query.item.toLowerCase()/i}})})
+           console.log( res.json({code:1,msg: await book.find({title: {$regex:/^(req.query.item.toLowerCase())/i}})}))
+           console.log( res.json({code:1,msg: await book.find({title: {$regex:/^req.query.item.toLowerCase()/i}})}))
+
     }
     catch(e){
         res.json({code:0,msg:'err: '+e})
