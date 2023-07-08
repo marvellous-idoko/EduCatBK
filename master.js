@@ -1354,13 +1354,26 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
             }
         }
         else if (req.query.cat == 'crtReadng') {
-            if(u['listOfBooksReadingByCoins'] == null || undefined){
+            if(u['listOfBooksReadingByCoins'].length == 0){
                 res.json({code:1,msg:'none'})
             }else{
                 for (let lm = 0; lm < u['listOfBooksReadingByCoins'].length; lm++) {
                     re.push(await book.findOne({ bookId: u['listOfBooksReadingByCoins'][lm] }))
                 }
             }
+        }
+        else if (req.query.cat == 'freeBooks') {
+            for (let index = 0; index < bks.length; index++) {
+                if(parseInt( bks[index].price) == 0){
+                    // if(re.length >5){
+                    //     break;
+                    // }else{
+                        re.push( bks[index])
+                    // }
+                }
+            }
+
+    
         }
         else if (req.query.cat == 'favAut') {
             let d = []
@@ -1449,6 +1462,10 @@ mstr.get('/apiTuto/getResource', async (req, res) => {
         trv.save()
     }).get("/apiTuto/removeCoin", async (req, res) => {
         let t = tutoUser.findOne({account_no:req.query.user})
+        console.log(parseInt(t.coins))
+        console.log(parseInt(req.query.amt) + "user coin")
+
+        console.log(parseInt(t.coins) - parseInt(req.query.amt))
         if(parseInt(t.coins) - parseInt(req.query.amt) < 0){
         res.json({code:0,msg:" coins insuffucient"})
         }else{
@@ -1518,7 +1535,6 @@ mstr.get('/apiTuto/getComments', async (req, res) => {
     })
 
 mstr.post('/apiTuto/admin/addAuthor', async (req, res) => {
-    console.log(req.body)
     let y = new author()
     y['name'] = req.body.name
     y['about'] = req.body.about
@@ -1536,7 +1552,6 @@ mstr.post('/apiTuto/admin/addAuthor', async (req, res) => {
     }
 })
 mstr.post('/apiTuto/admin/uploadBook', async (req, res) => {
-    console.log(req.body)
     let y = new book()
     y['bookArt'] = req.body.bookCova
     y['title'] = req.body.name
@@ -1550,14 +1565,7 @@ mstr.post('/apiTuto/admin/uploadBook', async (req, res) => {
     y['ack'] = req.body.ack
     y['noOfStars'] = req.body.stars
     y['noOfReads'] = 0
-    y['chapters'] = [
-        // {chapter1:req.body.chapter1},
-        // {chapter2:req.body.chapter2},
-        // {chapter3:req.body.chapter3},
-        // {chapter4:req.body.chapter4},
-        // {chapter5:req.body.chapter5},
-        // {chapter6:req.body.chapter6},
-    ]
+    y['chapters'] = []
     y['genres'] = req.body.genres
     y['price'] = req.body.price
     y['bookId'] = req.body.id
@@ -1613,7 +1621,7 @@ mstr.get('/apiTuto/increNoReads', async (req, res) => {
     
 }).get('/apiTuto/chkBkCrnRead',async(req,res)=>{
     let u = await tutoUser.findOne({account_no:req.query.user})
-   if(u['clt'] == null || undefined){
+   if(!(u['clt'])){
        
        res.json({code:1})
     }
@@ -1632,22 +1640,28 @@ mstr.get('/apiTuto/increNoReads', async (req, res) => {
             }
     
 }).get('/apiTuto/rmvCoin',async(req,res)=>{
-    let bk = await book.findOne({bookId:req.query.bookId})
+    console.log('kil')
     let u = await tutoUser.findOne({account_no:req.query.user})
+    
+   if(await checkIfPaid(req.query.user,req.query.bookId)){
+    u.hash = ''
+    u.salt = ''
+    res.send({code:1,msg:'done',user:u})
+   }else{ 
+    let bk = await book.findOne({bookId:req.query.bookId})
     let yi = {}
-    // console.log(parseInt(u.coins) > parseInt(bk.price))
-    if(parseInt(u.coins) > parseInt(bk.price)){
+
+    // if(parseInt(u.coins) >= parseInt(bk.chapter[parseInt(req.query.chptr)]['price'] )){
+    //     u.coins = parseInt(u.coins) - parseInt(bk.chapter[parseInt(req.query.chptr)]['price'])
+        
+    if(parseInt(u.coins) >= parseInt(bk.price)){
         u.coins = parseInt(u.coins) - parseInt(bk.price)
         // check for bookId in each element of arr of type object 
         if(u['clt'] == null || undefined){
             u['clt']= JSON.stringify ({[req.query.bookId]:2})
-            console.log(u['clt'])
-
         }
         else {
-
             yi = JSON.parse(u['clt'])
-        
             if (req.query.bookId in yi) {
                 // increase count by one
                 if (parseInt(req.query.chptr) > parseInt(yi[req.query.bookId])) {
@@ -1656,22 +1670,21 @@ mstr.get('/apiTuto/increNoReads', async (req, res) => {
 
             } else {
                 console.log(parseInt(req.query.chptr))
-
                 yi[req.query.bookId] = 2
             }
             u['clt'] = JSON.stringify(yi)
         }
 
-           let yu = await u.save()
+         await u.save()
             
-            console.log(yu['clt'])
-        yu.hash = ''
-        yu.salt = ''
-        res.send({code:1,msg:'done',user:yu})
+        u.hash = ''
+        u.salt = ''
+        res.send({code:1,msg:'done',user:u})
         }
     else{
         res.json({code:1,msg:'insufficient'})
     }
+}
 
 
 }).get('/apiTuto/search',async(req,res)=>{
@@ -1696,6 +1709,7 @@ mstr.get('/apiTuto/increNoReads', async (req, res) => {
 }).get('/apiTuto/admin/cmpltBk',async(req,res)=>{
     let bk = await book.findOne({bookId:req.query.bookId})
     bk['done'] = true
+    console.log(await bk.save())
     bk.save()
     res.json({code:1,msg:'successfully ended'})
 }).delete('/apiTuto/admin/delBk',async(req,res)=>{
@@ -1703,6 +1717,30 @@ mstr.get('/apiTuto/increNoReads', async (req, res) => {
     console.log(kj)
     res.json({code:1,msg:'deleted'})
 })
+
+async function checkIfPaid(userId,bookId,chapter){
+    let u = await tutoUser.findOne({account_no:userId});
+    // let yi = JSON.parse(u['clt'])
+    if(u['clt'] == null || undefined){
+        u['clt']= JSON.stringify ({[bookId]:2})
+        await u.save()
+        return true;
+    }else{
+    let yi = JSON.parse(u['clt'])
+
+        if(bookId in yi){
+            if (parseInt(chapter) >= parseInt(yi[bookId])) {
+                return true;
+            }else{
+                return false;
+            }
+    
+        }else{
+            return false;
+        }
+    }
+}
+
 let trendArr = []
 let trendArrF = []
 let arrTre = []
