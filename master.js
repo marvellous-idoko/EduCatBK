@@ -31,6 +31,7 @@ const tutoUser = require('./schema/tutoUser')
 const book = require('./schema/book');
 const author = require("./schema/author");
 const trxns = require("./schema/trxns");
+const { sendToAll } = require("./notifier");
 // mstr.get('*', (req, res) => {
 //     console.log(req.url)
 //    if(req.url.includes('.png')){
@@ -949,7 +950,6 @@ mstr.post('/pin/create', async (req, res) => {
 
 mstr.post('/apiTuto/auth/login', async (req, res) => {
     let r = await tutoUser.findOne({ email: req.body.email })
-    console.log(r)
     if (r == null) {
         res.json({ code: 0, msg: 'account not found' })
     } else {
@@ -1575,15 +1575,29 @@ mstr.post('/apiTuto/admin/uploadBook', async (req, res) => {
     try {
         let s = await y.save()
         res.json({ code: 1, msg: "successfully uploaded book" })
+        let body = `Your favourite author, ${y.author} just uploaded a new book titled  ${y.title}. Check it out now.`;
+    sendToAll({body,title:'New Book Alert' })
+        
     } catch (e) {
         console.log(e)
         res.json({ code: 0, msg: 'error: ' + e })
     }
-}).post('/apiTuto/admin/addChapter', async (req, res) => {
+}).post('/apiTuto/notificationtoken', async (req, res)=>{
+    console.log(req.body)
+    res.json()
+})
+.post('/notify', async (req, res) => {
+    sendToAll
+})
+    .post('/apiTuto/admin/addChapter', async (req, res) => {
     let y = await book.findOne({ bookId: req.body.id })
     y['chapters'].push({ 'chapter': req.body.chp })
     y.save()
     res.json({ code: 1, msg: 'successfully added chapter' })
+    let body = `Your favourite author, ${y.author} just updated this beautiful story,
+                 ${book.title}. Continue reading now.`;
+
+    sendToAll({body,title:'Book Update' })
 })
 mstr.get('/apiTuto/increNoReads', async (req, res) => {
     try {
@@ -1627,8 +1641,6 @@ mstr.get('/apiTuto/increNoReads', async (req, res) => {
     }
     else {
                 let yi = JSON.parse(u['clt'])
-
-                
                 if(req.query.bookId in yi){
                     // increase count by one
                 res.json({code:1,msg:'avail',kile:yi[req.query.bookId]})
@@ -1640,7 +1652,6 @@ mstr.get('/apiTuto/increNoReads', async (req, res) => {
             }
     
 }).get('/apiTuto/rmvCoin',async(req,res)=>{
-    console.log('kil')
     let u = await tutoUser.findOne({account_no:req.query.user})
     
    if(await checkIfPaid(req.query.user,req.query.bookId)){

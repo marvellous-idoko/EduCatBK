@@ -28,7 +28,8 @@ mongoose.connection.on('error',(err)=>{
     console.log("connected")
 })
 
-
+const firebase = require('./notify')
+firebase.initialise();
 // app.use('/school', school)
 // app.use('/master', master)
 app.use('/', master)
