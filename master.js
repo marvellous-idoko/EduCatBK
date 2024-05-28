@@ -819,7 +819,7 @@ mstr.get('/mstr/getRstDet/:id', async (req, res) => {
                     `
                 emailWrap = {
                     from: 'aptmachjo@outlook.com',
-                    to: 'infiniteflow.llp@gmail.com',
+                    to: acct.email,
                     subject: 'Reset password',
                     html: msg
                 };
@@ -839,7 +839,7 @@ mstr.get('/mstr/getRstDet/:id', async (req, res) => {
             `
             emailWrap = {
                 from: 'aptmachjo@outlook.com',
-                to: 'infiniteflow.llp@gmail.com',
+                to: acct.email,
                 subject: 'Reset password',
                 html: msg
             };
@@ -860,7 +860,7 @@ mstr.get('/mstr/getRstDet/:id', async (req, res) => {
     `
         emailWrap = {
             from: 'aptmachjo@outlook.com',
-            to: 'infiniteflow.llp@gmail.com',
+            to: acct.email,
             subject: 'Reset password',
             html: msg
         };
