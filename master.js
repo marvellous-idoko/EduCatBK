@@ -948,7 +948,6 @@ mstr.post('/pin/create', async (req, res) => {
 
 
 mstr.post('/apiTuto/auth/login', async (req, res) => {
-    console.log(req.body)
     let r = await tutoUser.findOne({ email: req.body.email })
     if (r == null) {
         res.json({ code: 0, msg: 'account not found' })
